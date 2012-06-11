@@ -1,0 +1,23 @@
+#<IfModule mod_rewrite.c>   
+#  RewriteEngine on
+#
+#  # if a directory or a file exists, use it directly  
+#  RewriteCond %{REQUEST_FILENAME} !-f  
+#  RewriteCond %{REQUEST_FILENAME} !-d  
+#  
+#  # otherwise forward it to index.php  
+#  RewriteRule . /application/index.php  
+#</IfModule>
+
+RewriteEngine on
+
+#Force www
+#RewriteCond %{HTTP_HOST}  ^yourdomain\.com
+#RewriteRule ^/(.*)$ http://www.yourdomain.com/$1 [R=301,L] 
+
+# if a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# otherwise forward it to index.php
+RewriteRule . index.php

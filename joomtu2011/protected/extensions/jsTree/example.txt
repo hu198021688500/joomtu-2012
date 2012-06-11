@@ -1,0 +1,106 @@
+Case 1: using HTML
+controllers/tree.php:
+
+class TreeController extends CController
+{
+  public function actionTree1()
+  {
+    $this->render('tree1',array());
+  }
+}
+
+views/tree/tree1.php:
+
+<div id="demo1">
+  <ul>
+   <li id="phtml_1" class="open"><a href="#">Root node 1</a>
+    <ul>
+      <li id="phtml_2"><a href="#" style="background-image:url('../media/images/ok.png');">Custom icon</a></li>
+      <li id="phtml_3"><a href="#">Child node 2</a></li>
+ 
+      <li id="phtml_4"><a href="#">Some other child node 111</a></li>
+    </ul>
+   </li>
+   <li id="phtml_5"><a href="#">Root node 2</a></li>
+  </ul>
+</div>
+<php?
+$this->Widget('application.extensions.jsTree.CjsTree', array(
+  'htmlOptions'=>array('id'=>'demo1'),
+));
+?>
+
+Case 2: using database table
+
+This extension works well with the nestedset extension.
+models/tree.php:
+
+class Tree extends CActiveRecord
+{
+  public function behaviors(){
+    return array(
+      'Treebehavior' => array(
+         'class' => 'application.extensions.nestedset.Treebehavior',
+      )
+    );
+  }
+}
+
+controllers/tree.php:
+
+class TreeController extends CController
+{
+  protected function formatData($tree)
+  {
+    if($tree->getChildNodes())
+      return array('text'=>CHtml::link($tree->name,"#"),'id'=>$tree->id,'expanded'=>true);
+    else
+      return array('text'=>CHtml::link($tree->name,"#"),'id'=>$tree->id);
+  }
+  public function actionTree2()
+  {
+    $data=array();
+    $treeList1=tree::model()->findAll();
+    foreach ($treeList1 as $i=>$model) {
+      $data[$i]=$this->formatData($model);
+      $treeList2=$model->getChildNodes();
+      foreach ($treeList2 as $j=>$submodel) {
+        $data[$i]['children'][]=$this->formatData($submodel);
+      };
+    };
+ 
+    $this->render('tree2',array('data'=>$data));
+  }
+}
+
+views/tree/tree2.php:
+
+$this->Widget('application.extensions.jsTree.CjsTree', array(
+'data'=>$data,
+));
+
+Appendix
+
+Of course, you can use many jsTree options as follows:
+
+$this->Widget('application.extensions.jsTree.CjsTree', array(
+    'data'=>$data,
+    'ui'=>array('theme_name'=>'apple'),
+    'rules'=>array(
+    droppable => "tree-drop",
+    multiple => true,
+    deletable => "all",
+    draggable => "all" 
+  ),
+  'callback'=>array(
+    "onrename"=>"js:function() { alert('Rename'); }",
+    "onmove"=>"js:function(NODE,REF_NODE,TYPE,TREE_OBJ,RB) {   alert('Move id:'+NODE.id+' ref:'+REF_NODE.id+' type:'+TYPE+' rb:'+RB); }",
+    "oncopy"=>"js:function() { alert('Copy'); }",
+    "oncreate"=>"js:function() { alert('Create'); }",
+    "ondelete"=>"js:function() { alert('Delete'); }",
+    "error"=>"js:function() { }",
+    "ondblclk"=>"js:function() { alert('Doubleclick'); TREE_OBJ.toggle_branch.call(TREE_OBJ, NODE); TREE_OBJ.select_branch.call(TREE_OBJ, NODE); }",
+    "onrgtclk"=>"js:function() { alert('Rightclick'); }",
+    "ondrop"=>"js:function() { alert('Foreign node dropped'); }",
+  ),
+));

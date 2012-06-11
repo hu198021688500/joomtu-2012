@@ -1,0 +1,13 @@
+Yii::import('application.extensions.phpmailer.JPhpMailer');
+$mail = new JPhpMailer;
+$mail->IsSMTP();
+$mail->Host = 'smpt.163.com';
+$mail->SMTPAuth = true;
+$mail->Username = 'yourname@163.com';
+$mail->Password = 'yourpassword';
+$mail->SetFrom('yourname@163.com', 'yourname');
+$mail->Subject = 'PHPMailer Test Subject via smtp, basic with authentication';
+$mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
+$mail->MsgHTML('<h1>JUST A TEST!</h1>');
+$mail->AddAddress('john.doe@otherdomain.com', 'John Doe');
+$mail->Send();

@@ -1,0 +1,20 @@
+$this->widget('ext.combobox.EJuiComboBox', array(
+    'model' => $myModel,
+    'attribute' => 'myAttribute',
+    // data to populate the select. Must be an array.
+    'data' => array('yii','is','fun','!'),
+    // options passed to plugin
+    'options' => array(
+        // JS code to execute on 'select' event, the selected item is
+        // available through the 'item' variable.
+        'onSelect' => 'alert("selected value : " + item.value);',
+        // JS code to be executed on 'change' event, the input is available
+        // through the '$(this)' variable.
+        'onChange' => 'alert("changed value : " + $(this).val());',
+        // If false, field value must be present in the select.
+        // Defaults to true.
+        'allowText' => false,
+    ),
+    // Options passed to the text input
+    'htmlOptions' => array('size' => 10),
+));

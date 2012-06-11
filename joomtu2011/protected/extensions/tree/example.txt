@@ -1,0 +1,55 @@
+    Extract the release file under protected/extensions
+
+Usage
+
+See the following code example:
+
+//in model
+public function behaviors()
+{
+    return array(
+    'TreeBehavior' => array(
+                'class' => 'ext.tree.behaviors.TreeBehavior',
+'id'=>'id',
+'parent_id'=>'parent_id',
+...
+            ),
+    );
+}
+
+//in controller
+
+public function actions()
+{
+        return array(
+            'treeMoveUp'=>'ext.tree.actions.TreeMoveUpAction',
+            'treeMoveDown'=>'ext.tree.actions.TreeMoveDownAction',
+            'treeCreate'=>'ext.tree.actions.TreeCreateAction',
+            'treeUpdate'=>'ext.tree.actions.TreeUpdateAction',
+            'treeLoad'=>'ext.tree.actions.TreeLoadAction',
+            'treeDelete'=>'ext.tree.actions.TreeDeleteAction',
+            'treeChildren'=>'ext.tree.actions.TreeChildrenAction',
+            'treeChildrenParent'=>'ext.tree.actions.TreeChildrenParentAction',
+        );
+}
+
+public function actionAdmin()
+{
+    $this->render('admin');
+}
+
+//in admin[view]
+
+$this->widget('ext.tree.widgets.TreeWidget',array('modelName'=>'YOur treeModel'));
+
+
+//default tree schema
+CREATE TABLE IF NOT EXISTS `tree` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lft` int(11) NOT NULL,
+  `rgt` int(11) NOT NULL,
+  `level` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `name` varchar(256) NOT NULL,
+  PRIMARY KEY (`id`)
+)
