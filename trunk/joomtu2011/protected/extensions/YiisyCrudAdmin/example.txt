@@ -1,0 +1,23 @@
+in protected/config/main.php append section import with
+
+'ext.YiisyCrudAdmin.*',
+Example import section:
+
+// autoloading model and component classes
+        'import'=>array(
+                'application.models.*',
+                'application.components.*',
+ 
+                'ext.YiisyCrudAdmin.*',
+        ),
+Create new model (or use exists) and modify like :
+
+class Export extends RActiveRecord //replace CActiveRecord with RActiveRecord
+{
+}
+Now you can create controller :
+
+class ExampleController extends RController 
+{
+        protected $_modelName = 'Example';
+}
