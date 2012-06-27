@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 03 月 29 日 19:05
--- 服务器版本: 5.1.61
--- PHP 版本: 5.3.6-13ubuntu3.6
+-- 生成日期: 2012 年 06 月 27 日 10:01
+-- 服务器版本: 5.5.24
+-- PHP 版本: 5.3.10-1ubuntu3.2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -20,6 +20,69 @@ SET time_zone = "+00:00";
 -- 数据库: `joomtu`
 --
 
+DELIMITER $$
+--
+-- 函数
+--
+CREATE DEFINER=`root`@`%` FUNCTION `GETDISTANCE`(ln1 DOUBLE, lt1 DOUBLE, ln2 DOUBLE, lt2 DOUBLE) RETURNS double
+    READS SQL DATA
+    DETERMINISTIC
+BEGIN
+    DECLARE EARTH_RADIUS DOUBLE;
+    
+    DECLARE radLt1 DOUBLE;
+    DECLARE radLt2 DOUBLE;
+    DECLARE radLtDiff DOUBLE;
+    DECLARE radLnDiff DOUBLE;
+
+    DECLARE distance DOUBLE;
+    
+    SET EARTH_RADIUS = 6378137;
+    SET radLt1 = lt1 * PI() / 180.0;
+    SET radLt2 = lt2 * PI() / 180.0;
+    SET radLtDiff = radLt1 - radLt2;
+    SET radLnDiff = (ln1 - ln2) * PI() / 180.0;
+    
+    SET distance = 2 * ASIN(SQRT(POW(SIN(radLtDiff / 2), 2) + COS(radLt1) * COS(radLt2) * POW(SIN(radLnDiff / 2), 2)));
+    SET distance = distance * EARTH_RADIUS;
+    SET distance = ROUND(distance * 10000) / 10000;
+    
+    RETURN distance;
+    END$$
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `INAROUND`(ln DOUBLE, lt DOUBLE, ln1 DOUBLE, lt1 DOUBLE, raidus INT) RETURNS tinyint(1)
+BEGIN
+    
+    DECLARE degree DOUBLE;
+    DECLARE dpmLt DOUBLE;
+    DECLARE radiusLt DOUBLE;
+    DECLARE minLt DOUBLE;
+    DECLARE maxLt DOUBLE;
+    DECLARE mpdLn DOUBLE;
+    DECLARE dpmLn DOUBLE;
+    DECLARE radiusLn DOUBLE;
+    DECLARE minLn DOUBLE;
+    DECLARE maxLn DOUBLE;
+    DECLARE ISINRADIUS DOUBLE;
+    
+    SET degree = (24901 * 1609) / 360.0;
+    SET dpmLt = 1 / degree;
+    SET radiusLt = dpmLt * raidus;
+    SET minLt = lt1 - radiusLt;
+    SET maxLt = lt1 + radiusLt;
+    SET mpdLn = degree * COS(lt1 * (PI() / 180));
+    SET dpmLn = 1 / mpdLn;
+    SET radiusLn = dpmLn * raidus;
+    SET minLn = ln1 - radiusLn;
+    SET maxLn = ln1 + radiusLn;
+    SET ISINRADIUS = (ln >= minLn && ln <= maxLn) && (lt >= minLt && lt <= maxLt);
+    
+    RETURN ISINRADIUS;
+
+    END$$
+
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -27,11 +90,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `jt_area` (
-  `aid` bigint(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '地区ID',
-  `pid` bigint(10) unsigned NOT NULL DEFAULT '0' COMMENT '父级ID',
-  `order` int(5) unsigned NOT NULL COMMENT '同级下所在位置',
-  `lid` bigint(10) unsigned NOT NULL COMMENT '节点左ID',
-  `rid` bigint(10) unsigned NOT NULL COMMENT '右节点ID',
+  `aid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '地区ID',
+  `pid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '父级ID',
+  `order` smallint(5) unsigned NOT NULL COMMENT '同级下所在位置',
+  `lid` int(10) unsigned NOT NULL COMMENT '节点左ID',
+  `rid` int(10) unsigned NOT NULL COMMENT '右节点ID',
   `depth` smallint(5) unsigned NOT NULL COMMENT '节点所在树的深度',
   `name` varchar(10) NOT NULL COMMENT '名称',
   PRIMARY KEY (`aid`),
@@ -3458,10 +3521,10 @@ INSERT INTO `jt_area` (`aid`, `pid`, `order`, `lid`, `rid`, `depth`, `name`) VAL
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_assignment`
+-- 表的结构 `jt_assignments`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_assignment` (
+CREATE TABLE IF NOT EXISTS `jt_assignments` (
   `itemname` varchar(64) NOT NULL,
   `userid` varchar(64) NOT NULL,
   `bizrule` text,
@@ -3472,10 +3535,23 @@ CREATE TABLE IF NOT EXISTS `jt_assignment` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_item`
+-- 表的结构 `jt_itemchildren`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_item` (
+CREATE TABLE IF NOT EXISTS `jt_itemchildren` (
+  `parent` varchar(64) NOT NULL,
+  `child` varchar(64) NOT NULL,
+  PRIMARY KEY (`parent`,`child`),
+  KEY `child` (`child`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_items`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_items` (
   `name` varchar(64) NOT NULL,
   `type` int(11) NOT NULL,
   `description` text,
@@ -3485,24 +3561,23 @@ CREATE TABLE IF NOT EXISTS `jt_item` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- 转存表中的数据 `jt_item`
+-- 转存表中的数据 `jt_items`
 --
 
-INSERT INTO `jt_item` (`name`, `type`, `description`, `bizrule`, `data`) VALUES
-('superAdmin', 2, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- 表的结构 `jt_item_children`
---
-
-CREATE TABLE IF NOT EXISTS `jt_item_children` (
-  `parent` varchar(64) NOT NULL,
-  `child` varchar(64) NOT NULL,
-  PRIMARY KEY (`parent`,`child`),
-  KEY `child` (`child`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+INSERT INTO `jt_items` (`name`, `type`, `description`, `bizrule`, `data`) VALUES
+('Authority', 2, NULL, NULL, NULL),
+('Administrator', 2, NULL, NULL, NULL),
+('User', 2, NULL, NULL, NULL),
+('Post Manager', 1, NULL, NULL, NULL),
+('User Manager', 1, NULL, NULL, NULL),
+('Delete Post', 0, NULL, NULL, NULL),
+('Create Post', 0, NULL, NULL, NULL),
+('Edit Post', 0, NULL, NULL, NULL),
+('View Post', 0, NULL, NULL, NULL),
+('Delete User', 0, NULL, NULL, NULL),
+('Create User', 0, NULL, NULL, NULL),
+('Edit User', 0, NULL, NULL, NULL),
+('View User', 0, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -3515,15 +3590,15 @@ CREATE TABLE IF NOT EXISTS `jt_key_value` (
   `key` varchar(15) DEFAULT NULL,
   `value` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='字典表';
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_menu`
+-- 表的结构 `jt_menu_admin`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_menu` (
+CREATE TABLE IF NOT EXISTS `jt_menu_admin` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
   `pid` mediumint(8) unsigned NOT NULL DEFAULT '1' COMMENT '菜单的父级菜单ID',
   `order` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '菜单顺序',
@@ -3539,43 +3614,46 @@ CREATE TABLE IF NOT EXISTS `jt_menu` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_message`
+-- 表的结构 `jt_menu_cat`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_message` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '消息ID',
-  `from_uid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '发送者ID',
-  `to_uid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '接收者ID，站内群发消息则为0，群发为所有接收者UID用逗号分隔',
-  `msg_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '消息正文ID',
-  `flag` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '已读标志，如果为原始群发消息则统一为0 未读 1已读 2 已删除',
-  `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '发送时间',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='站内信关系表' AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `jt_menu_cat` (
+  `cid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '分类ID',
+  PRIMARY KEY (`cid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='分类目录' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_message_content`
+-- 表的结构 `jt_msg_detail`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_message_content` (
-  `msg_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
-  `from_uid` int(10) unsigned NOT NULL COMMENT '发送者ID',
-  `content` text COMMENT '消息正文',
+CREATE TABLE IF NOT EXISTS `jt_msg_detail` (
+  `msg_id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
+  `from_uid` int(11) unsigned NOT NULL COMMENT '发送者ID',
+  `to_type` text NOT NULL COMMENT '“friend”：好友群发，“1，2，3”：一对多群发',
+  `subject` varchar(150) NOT NULL COMMENT '站内信主题',
+  `content` text NOT NULL COMMENT '消息正文',
+  `send_time` int(10) unsigned NOT NULL COMMENT '添加时间',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
   PRIMARY KEY (`msg_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_rel_map`
+-- 表的结构 `jt_msg_rel`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_rel_map` (
-  `sequence` varchar(10) NOT NULL,
-  `name` varchar(5) NOT NULL,
-  PRIMARY KEY (`sequence`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户关系名称映射';
+CREATE TABLE IF NOT EXISTS `jt_msg_rel` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `from_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '发送者ID',
+  `to_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '接收者ID',
+  `msg_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '消息正文ID',
+  `flag` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0：未读 1：已读 2：已删除',
+  `send_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '发送时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='站内信关系表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3584,16 +3662,17 @@ CREATE TABLE IF NOT EXISTS `jt_rel_map` (
 --
 
 CREATE TABLE IF NOT EXISTS `jt_user` (
-  `uid` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `email` varchar(30) NOT NULL COMMENT 'Email地址',
   `password` char(32) NOT NULL COMMENT '密码，明文6-16个字符',
+  `old_password` char(32) NOT NULL COMMENT '旧密码，密码明文',
   `salt` char(15) NOT NULL COMMENT '密码保护散列值，前四位是密码明文的前后两个字符之和，后四位是随机码',
   `name` varchar(15) DEFAULT NULL COMMENT '用户昵称',
   `sex` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '性别，取值0：未知 1：女 2：男',
   `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
   `mobile` char(11) DEFAULT NULL COMMENT '手机号码',
   `birthday` char(12) DEFAULT NULL COMMENT '出生日期，例如：1985-12-12',
-  `address` smallint(5) unsigned DEFAULT '0' COMMENT '所在地区，例如：四川省 成都市 青羊区',
+  `address` varchar(100) DEFAULT NULL COMMENT '所在地区，例如：四川省 成都市 青羊区',
   `rid` smallint(4) unsigned NOT NULL DEFAULT '0' COMMENT '用户所属角色的ID',
   `nid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '在neo4j中的节点ID',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态0：未激活 1：正常 2：禁用 3：删除',
@@ -3602,30 +3681,32 @@ CREATE TABLE IF NOT EXISTS `jt_user` (
   `integral` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '积分，成长值',
   `reg_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '注册的日期',
   `reg_ip` char(16) DEFAULT NULL COMMENT '注册时的IP',
-  `reg_src` enum('web,mobile') DEFAULT NULL COMMENT '用户注册来源',
-  `login_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '最后一次登录时的日期',
-  `login_ip` char(16) DEFAULT NULL COMMENT '最后一次登录时的IP',
+  `reg_source` enum('web,mobile') DEFAULT NULL COMMENT '用户注册来源',
+  `last_login_time` int(10) unsigned DEFAULT NULL COMMENT '最后一次登录时的日期',
+  `last_login_ip` char(16) DEFAULT NULL COMMENT '最后一次登录时的IP',
+  `login_fail_times` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '登陆失败的次数',
+  `reset_pwd_time` int(10) NOT NULL DEFAULT '0' COMMENT '重置密码时间',
   `update_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '个人信息更新时间',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户信息';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='用户信息' AUTO_INCREMENT=13 ;
 
 --
 -- 转存表中的数据 `jt_user`
 --
 
-INSERT INTO `jt_user` (`uid`, `email`, `password`, `salt`, `name`, `sex`, `avatar`, `mobile`, `birthday`, `address`, `rid`, `nid`, `status`, `config`, `signature`, `integral`, `reg_time`, `reg_ip`, `reg_src`, `login_time`, `login_ip`, `update_time`) VALUES
-(1, 'admin@admin.com', '8cc029e8016f21b06e9e862538bcb24f', '4ef59e14ac563', '胡国兵', 0, NULL, NULL, NULL, 0, 1, 1, 0, NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0),
-(2, 'hu198021688500@163.com', '96a72bd86e8dcc6b3ca24882c2381d49', '4f56ed66a689a', '胡世伟', 0, NULL, NULL, NULL, 0, 2, 2, 0, NULL, NULL, 0, 1331096934, '127.0.0.1', NULL, 0, NULL, 1331096934),
-(3, 'hu1980216885001@163.com', '451e40f6467d8c8789683b7dae28f127', '4f570ec08497a', '朱大香', 0, NULL, NULL, NULL, 0, 2, 3, 0, NULL, NULL, 0, 1331105472, '127.0.0.1', NULL, 0, NULL, 1331105472),
-(4, 'hu1980216885002@163.com', '7c6cd0dc46ee17217de5772c4c14e567', '4f570f0415f22', '胡灵义', 0, NULL, NULL, NULL, 0, 2, 4, 0, NULL, NULL, 0, 1331105540, '127.0.0.1', NULL, 0, NULL, 1331105540),
-(5, 'hu1980216885003@163.com', '17bf70af6142c54634207c6acb6a55e9', '4f5710a181132', '胡万华', 0, NULL, NULL, NULL, 0, 2, 5, 0, NULL, NULL, 0, 1331105953, '127.0.0.1', NULL, 0, NULL, 1331105953),
-(6, 'hu1980216885004@163.com', 'b0a11b3dd37205dfee861d733cf092b7', '4f5710d228a43', '胡世林', 0, NULL, NULL, NULL, 0, 2, 6, 0, NULL, NULL, 0, 1331106002, '127.0.0.1', NULL, 0, NULL, 1331106002),
-(7, 'hu1980216885005@163.com', 'ac0aa070543e9b7ca7bb9ae17014d317', '4f58466409e04', '胡万昌', 0, NULL, NULL, NULL, 0, 2, 7, 0, NULL, NULL, 0, 1331185252, '127.0.0.1', NULL, 0, NULL, 1331185252),
-(8, 'hu1980216885006@163.com', '7a0cb7e17e97735e95a07f968f23ad32', '4f585147a4774', '胡世俊', 0, NULL, NULL, NULL, 0, 2, 8, 0, NULL, NULL, 0, 1331188039, '127.0.0.1', NULL, 0, NULL, 1331188039),
-(9, 'hu1980216885007@163.com', '64b7a3ba29e34b28780f8a5f5a737a34', '4f5852ede12ff', '胡义', 0, NULL, NULL, NULL, 0, 2, 9, 0, NULL, NULL, 0, 1331188461, '127.0.0.1', NULL, 0, NULL, 1331188461),
-(10, 'hu1980216885008@163.com', '3392912311ab7f5e3be366f3c6e2dc60', '4f58535f2eacd', '胡军', 0, NULL, NULL, NULL, 0, 2, 10, 0, NULL, NULL, 0, 1331188575, '127.0.0.1', NULL, 0, NULL, 1331188575),
-(11, 'hu19802168850010@163.com', '3d03dcbfb1d0487139635cf72d1cb968', '4f58542fad864', '胡军', 0, NULL, NULL, NULL, 0, 2, 11, 0, NULL, NULL, 0, 1331188783, '127.0.0.1', NULL, 0, NULL, 1331188783),
-(12, 'hu1980216885009@163.com', '9a4cd532b7f925e25e46170189782948', '4f5873b20b1b2', '胡世品', 0, NULL, NULL, NULL, 0, 2, 12, 0, NULL, NULL, 0, 1331196850, '127.0.0.1', NULL, 0, NULL, 1331196850);
+INSERT INTO `jt_user` (`uid`, `email`, `password`, `old_password`, `salt`, `name`, `sex`, `avatar`, `mobile`, `birthday`, `address`, `rid`, `nid`, `status`, `config`, `signature`, `integral`, `reg_time`, `reg_ip`, `reg_source`, `last_login_time`, `last_login_ip`, `login_fail_times`, `reset_pwd_time`, `update_time`) VALUES
+(1, 'admin@admin.com', '8cc029e8016f21b06e9e862538bcb24f', '', '4ef59e14ac563', '胡国兵', 0, NULL, NULL, NULL, '0', 1, 1, 0, NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0, 0),
+(2, 'hu1980216885000@163.com', '96a72bd86e8dcc6b3ca24882c2381d49', '', '4f56ed66a689a', '胡世伟', 0, NULL, NULL, NULL, '0', 2, 2, 0, NULL, NULL, 0, 1331096934, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331096934),
+(3, 'hu1980216885001@163.com', '451e40f6467d8c8789683b7dae28f127', '', '4f570ec08497a', '朱大香', 0, NULL, NULL, NULL, '0', 2, 3, 0, NULL, NULL, 0, 1331105472, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105472),
+(4, 'hu1980216885002@163.com', '7c6cd0dc46ee17217de5772c4c14e567', '', '4f570f0415f22', '胡灵义', 0, NULL, NULL, NULL, '0', 2, 4, 0, NULL, NULL, 0, 1331105540, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105540),
+(5, 'hu1980216885003@163.com', '17bf70af6142c54634207c6acb6a55e9', '', '4f5710a181132', '胡万华', 0, NULL, NULL, NULL, '0', 2, 5, 0, NULL, NULL, 0, 1331105953, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105953),
+(6, 'hu1980216885004@163.com', 'b0a11b3dd37205dfee861d733cf092b7', '', '4f5710d228a43', '胡世林', 0, NULL, NULL, NULL, '0', 2, 6, 0, NULL, NULL, 0, 1331106002, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331106002),
+(7, 'hu1980216885005@163.com', 'ac0aa070543e9b7ca7bb9ae17014d317', '', '4f58466409e04', '胡万昌', 0, NULL, NULL, NULL, '0', 2, 7, 0, NULL, NULL, 0, 1331185252, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331185252),
+(8, 'hu1980216885006@163.com', '7a0cb7e17e97735e95a07f968f23ad32', '', '4f585147a4774', '胡世俊', 0, NULL, NULL, NULL, '0', 2, 8, 0, NULL, NULL, 0, 1331188039, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188039),
+(9, 'hu1980216885007@163.com', '64b7a3ba29e34b28780f8a5f5a737a34', '', '4f5852ede12ff', '胡义', 0, NULL, NULL, NULL, '0', 2, 9, 0, NULL, NULL, 0, 1331188461, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188461),
+(10, 'hu1980216885008@163.com', '3392912311ab7f5e3be366f3c6e2dc60', '', '4f58535f2eacd', '胡军', 0, NULL, NULL, NULL, '0', 2, 10, 0, NULL, NULL, 0, 1331188575, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188575),
+(11, 'hu1980216885009@163.com', '3d03dcbfb1d0487139635cf72d1cb968', '', '4f58542fad864', '胡军', 0, NULL, NULL, NULL, '0', 2, 11, 0, NULL, NULL, 0, 1331188783, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188783),
+(12, 'hu1980216885010@163.com', '9a4cd532b7f925e25e46170189782948', '', '4f5873b20b1b2', '胡世品', 0, NULL, NULL, NULL, '0', 2, 12, 0, NULL, NULL, 0, 1331196850, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331196850);
 
 -- --------------------------------------------------------
 
@@ -3634,11 +3715,91 @@ INSERT INTO `jt_user` (`uid`, `email`, `password`, `salt`, `name`, `sex`, `avata
 --
 
 CREATE TABLE IF NOT EXISTS `jt_user_ext` (
-  `uid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-  `real_name` varchar(10) DEFAULT NULL COMMENT '真是姓名',
+  `uid` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `really_name` varchar(10) DEFAULT NULL COMMENT '真是姓名',
+  `ID_number` char(18) DEFAULT NULL COMMENT '身份证号码',
   `qq` char(12) DEFAULT NULL COMMENT 'QQ号码',
+  `inviteuid` int(11) unsigned DEFAULT NULL COMMENT '邀请人ID',
+  `invitecode` char(32) DEFAULT NULL COMMENT '邀请码',
+  `activationcode` char(32) DEFAULT NULL COMMENT '激活码',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户扩展信息' AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户扩展信息';
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_grade`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_grade` (
+  `gid` mediumint(8) unsigned NOT NULL AUTO_INCREMENT COMMENT '等级ID',
+  `name` varchar(10) NOT NULL COMMENT '用户等级名称',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '等级状态，0:正常',
+  PRIMARY KEY (`gid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='用户等级表' AUTO_INCREMENT=13 ;
+
+--
+-- 转存表中的数据 `jt_user_grade`
+--
+
+INSERT INTO `jt_user_grade` (`gid`, `name`, `status`) VALUES
+(1, '纯情少女', 0),
+(2, '纯情少男', 0),
+(3, '一见钟情', 0),
+(4, '一见钟情', 0),
+(5, ' 热恋之女', 0),
+(6, ' 热恋之男', 0),
+(7, '谈婚论嫁', 0),
+(8, '谈婚论嫁', 0),
+(9, '家庭主妇', 0),
+(10, '家庭煮夫', 0),
+(11, '相扶到老', 0),
+(12, '相扶到老', 0);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_merchant_ext`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_merchant_ext` (
+  `mid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '商户ID',
+  `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
+  PRIMARY KEY (`mid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商户扩展表' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_photo`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_photo` (
+  `pid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '相册ID',
+  PRIMARY KEY (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户相册表' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_photo_pic`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_photo_pic` (
+  `pid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '相册图片ID',
+  PRIMARY KEY (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户相册图片表' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_rel`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_rel` (
+  `rid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '关系ID',
+  PRIMARY KEY (`rid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户关系表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3649,20 +3810,55 @@ CREATE TABLE IF NOT EXISTS `jt_user_ext` (
 CREATE TABLE IF NOT EXISTS `jt_user_role` (
   `rid` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT '角色ID',
   `name` varchar(10) NOT NULL COMMENT '角色标识',
-  `show_name` varchar(10) NOT NULL COMMENT '显示名称',
+  `show_name` varchar(10) DEFAULT NULL COMMENT '显示名称',
+  `description` varchar(255) DEFAULT NULL COMMENT '描述',
   `create_time` int(10) unsigned NOT NULL COMMENT '创建时间',
   `update_time` int(10) unsigned NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`rid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户角色' AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户角色' AUTO_INCREMENT=6 ;
 
 --
 -- 转存表中的数据 `jt_user_role`
 --
 
-INSERT INTO `jt_user_role` (`rid`, `name`, `show_name`, `create_time`, `update_time`) VALUES
-(1, '管理员', '', 0, 0),
-(2, '普通用户', '', 0, 0),
-(3, '游客', '', 0, 0);
+INSERT INTO `jt_user_role` (`rid`, `name`, `show_name`, `description`, `create_time`, `update_time`) VALUES
+(1, '管理员', '管理员', '超级管理员', 0, 0),
+(2, '运维人员', '运维人员', '运维人员', 0, 0),
+(3, '编辑人员', '编辑人员', '编辑人员', 0, 0),
+(4, '普通会员', '普通会员', '普通会员', 0, 0),
+(5, '游客', '游客', '游客', 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_stores_ext`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_stores_ext` (
+  `sid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '门店ID',
+  `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='门店扩展表' AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `YiiSession`
+--
+
+CREATE TABLE IF NOT EXISTS `YiiSession` (
+  `id` char(32) NOT NULL,
+  `expire` int(11) DEFAULT NULL,
+  `data` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- 转存表中的数据 `YiiSession`
+--
+
+INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
+('9vro2j1894uuag3vno877fmna1', 1333956411, '');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
