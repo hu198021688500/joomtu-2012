@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 15 日 19:06
+-- 生成日期: 2012 年 07 月 15 日 22:34
 -- 服务器版本: 5.5.24-0ubuntu0.12.04.1
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
@@ -3629,14 +3629,11 @@ CREATE TABLE IF NOT EXISTS `jt_menu_cat` (
 --
 
 CREATE TABLE IF NOT EXISTS `jt_msg_detail` (
-  `msg_id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
-  `from_uid` int(10) unsigned NOT NULL COMMENT '发送者ID',
-  `send_type` tinyint(1) unsigned DEFAULT '1' COMMENT '1:自定义，2:组内群发',
-  `subject` varchar(150) NOT NULL COMMENT '站内信主题',
+  `mid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
+  `title` varchar(50) NOT NULL COMMENT '站内信主题',
   `content` text NOT NULL COMMENT '消息正文',
-  `send_time` int(10) unsigned NOT NULL COMMENT '添加时间',
   `status` tinyint(1) unsigned DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
-  PRIMARY KEY (`msg_id`)
+  PRIMARY KEY (`mid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3649,9 +3646,11 @@ CREATE TABLE IF NOT EXISTS `jt_msg_inbox` (
   `id` bigint(20) NOT NULL,
   `uid` int(10) unsigned NOT NULL COMMENT '收件人UID',
   `from_uid` int(10) unsigned NOT NULL COMMENT '发件人',
-  `msg_id` bigint(20) unsigned NOT NULL COMMENT '站内信ID',
-  `flag` tinyint(1) unsigned DEFAULT '0' COMMENT '站内信状态，0:未读，1:已读，2:已删除',
-  `update_time` int(10) unsigned NOT NULL COMMENT '更新时间'
+  `msg_id` int(10) unsigned NOT NULL COMMENT '站内信ID',
+  `msg_title` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+  `update_time` int(10) unsigned NOT NULL COMMENT '更新时间',
+  `status` tinyint(1) unsigned DEFAULT '0' COMMENT '站内信状态，0:未读，1:已读，2:已删除',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='用户站内信收件箱';
 
 -- --------------------------------------------------------
@@ -3664,10 +3663,12 @@ CREATE TABLE IF NOT EXISTS `jt_msg_outbox` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '消息ID',
   `uid` int(10) unsigned NOT NULL COMMENT '发送者ID',
   `to_uid` text COMMENT '当send_type为1时，设置接收者ID，多人以逗号隔开',
-  `msg_id` bigint(20) unsigned NOT NULL COMMENT '消息正文ID',
+  `msg_id` int(10) unsigned NOT NULL COMMENT '消息正文ID',
+  `msg_title` varchar(50) DEFAULT NULL COMMENT '站内信标题',
   `send_type` tinyint(1) unsigned DEFAULT '1' COMMENT '站内信发送类型，1:自定义2:组内',
   `group_id` int(10) unsigned DEFAULT NULL COMMENT '当send_type为2时，设置组ID',
   `send_time` int(10) unsigned NOT NULL COMMENT '发送时间',
+  `status` tinyint(1) unsigned DEFAULT '1' COMMENT '状态',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=1 ;
 
