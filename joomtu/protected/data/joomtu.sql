@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.10.1
+-- version 3.5.2
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 06 月 27 日 10:01
--- 服务器版本: 5.5.24
+-- 生成日期: 2012 年 07 月 15 日 19:06
+-- 服务器版本: 5.5.24-0ubuntu0.12.04.1
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
@@ -3630,30 +3630,46 @@ CREATE TABLE IF NOT EXISTS `jt_menu_cat` (
 
 CREATE TABLE IF NOT EXISTS `jt_msg_detail` (
   `msg_id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
-  `from_uid` int(11) unsigned NOT NULL COMMENT '发送者ID',
-  `to_type` text NOT NULL COMMENT '“friend”：好友群发，“1，2，3”：一对多群发',
+  `from_uid` int(10) unsigned NOT NULL COMMENT '发送者ID',
+  `send_type` tinyint(1) unsigned DEFAULT '1' COMMENT '1:自定义，2:组内群发',
   `subject` varchar(150) NOT NULL COMMENT '站内信主题',
   `content` text NOT NULL COMMENT '消息正文',
   `send_time` int(10) unsigned NOT NULL COMMENT '添加时间',
-  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
+  `status` tinyint(1) unsigned DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
   PRIMARY KEY (`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_msg_rel`
+-- 表的结构 `jt_msg_inbox`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_msg_rel` (
+CREATE TABLE IF NOT EXISTS `jt_msg_inbox` (
+  `id` bigint(20) NOT NULL,
+  `uid` int(10) unsigned NOT NULL COMMENT '收件人UID',
+  `from_uid` int(10) unsigned NOT NULL COMMENT '发件人',
+  `msg_id` bigint(20) unsigned NOT NULL COMMENT '站内信ID',
+  `flag` tinyint(1) unsigned DEFAULT '0' COMMENT '站内信状态，0:未读，1:已读，2:已删除',
+  `update_time` int(10) unsigned NOT NULL COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='用户站内信收件箱';
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_msg_outbox`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_msg_outbox` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '消息ID',
-  `from_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '发送者ID',
-  `to_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '接收者ID',
-  `msg_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '消息正文ID',
-  `flag` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0：未读 1：已读 2：已删除',
-  `send_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '发送时间',
+  `uid` int(10) unsigned NOT NULL COMMENT '发送者ID',
+  `to_uid` text COMMENT '当send_type为1时，设置接收者ID，多人以逗号隔开',
+  `msg_id` bigint(20) unsigned NOT NULL COMMENT '消息正文ID',
+  `send_type` tinyint(1) unsigned DEFAULT '1' COMMENT '站内信发送类型，1:自定义2:组内',
+  `group_id` int(10) unsigned DEFAULT NULL COMMENT '当send_type为2时，设置组ID',
+  `send_time` int(10) unsigned NOT NULL COMMENT '发送时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='站内信关系表' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3662,7 +3678,7 @@ CREATE TABLE IF NOT EXISTS `jt_msg_rel` (
 --
 
 CREATE TABLE IF NOT EXISTS `jt_user` (
-  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `uid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `email` varchar(30) NOT NULL COMMENT 'Email地址',
   `password` char(32) NOT NULL COMMENT '密码，明文6-16个字符',
   `old_password` char(32) NOT NULL COMMENT '旧密码，密码明文',
@@ -3715,7 +3731,7 @@ INSERT INTO `jt_user` (`uid`, `email`, `password`, `old_password`, `salt`, `name
 --
 
 CREATE TABLE IF NOT EXISTS `jt_user_ext` (
-  `uid` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
   `really_name` varchar(10) DEFAULT NULL COMMENT '真是姓名',
   `ID_number` char(18) DEFAULT NULL COMMENT '身份证号码',
   `qq` char(12) DEFAULT NULL COMMENT 'QQ号码',
