@@ -2,7 +2,7 @@
 
 /**
  * 2012-7-16 11:32:59 UTF-8
- * @package
+ * @package protected.behaviors
  * @version 1.0
  *
  * @author hugb <hu198021688500@163.com>
@@ -14,7 +14,7 @@
  */
 
 /**
- * Description of MessageBehavior
+ * 站内信
  */
 class MessageBehavior extends ErrorBehavior {
 
@@ -145,6 +145,7 @@ class MessageBehavior extends ErrorBehavior {
                 $messageInbox->save();
             }
         }
+        //组内分发
         return true;
     }
 
