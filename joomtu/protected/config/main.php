@@ -117,23 +117,23 @@ return array(
             ),
         ),
         'db' => array(
-//            'class' => 'CDbConnection',
-//            'connectionString' => 'mysql:host=127.0.0.1;dbname=joomtu;port=3306',
-//            'username' => 'root',
-//            'password' => 'admin',
-//            'charset' => 'utf8',
-//            'tablePrefix' => 'jt_',
-//            'autoConnect' => false,
-//            'emulatePrepare' => true,
-//            'enableParamLogging' => YII_DEBUG,
-//            'schemaCachingDuration' => 54000, // 15 minutes,
-            'connectionString' => 'mysql:host=192.168.20.30;port=3306;dbname=mocube',
-            'emulatePrepare' => true,
-            'enableParamLogging' => true,
-            'username' => 'mocube',
-            'password' => 'mocube',
+            'class' => 'CDbConnection',
+            'connectionString' => 'mysql:host=192.168.35.188;dbname=joomtu;port=3306',
+            'username' => 'root',
+            'password' => 'admin',
             'charset' => 'utf8',
-            'tablePrefix' => 'mb_',
+            'tablePrefix' => 'jt_',
+            'autoConnect' => false,
+            'emulatePrepare' => true,
+            'enableParamLogging' => YII_DEBUG,
+            'schemaCachingDuration' => 54000, // 15 minutes,
+//            'connectionString' => 'mysql:host=192.168.20.30;port=3306;dbname=mocube',
+//            'emulatePrepare' => true,
+//            'enableParamLogging' => true,
+//            'username' => 'mocube',
+//            'password' => 'mocube',
+//            'charset' => 'utf8',
+//            'tablePrefix' => 'mb_',
 //            //配置为 SAEDbConnection 则不必考虑用户名密码 并自动读写分离
 //            #'class'=>'SAEDbConnection',
 //            'connectionString' => 'mysql:host=localhost;port=3306;dbname=app_yiis',
@@ -267,7 +267,7 @@ if(defined('SAE_TMP_PATH'))
             'schemaCachingDuration'=>3600,
     );
     //SAE不支持I/O 使用storage 存储 assets。 如果在正式环境，请将发布到assets的css/js做合并，直接放到app目录下，storage的分钟限额为5000，app为200000
-    //最新的SAE 不使用storage 而是在siteController中，导入了一个SAEAssetsAction，通过 site/assets?path=aaa.txt ，将文件内容输出到web端，来访问实际的 aaa.txt 文件， 
+    //最新的SAE 不使用storage 而是在siteController中，导入了一个SAEAssetsAction，通过 site/assets?path=aaa.txt ，将文件内容输出到web端，来访问实际的 aaa.txt 文件，
     $config['components']['assetManager'] = array('class' => 'SAEAssetManager','domain'=> 'assets');
     //如果没有必要，不用修改缓存配置。 SAE不支持本地文件的IO处理 已经提供了memcache
     $config['components']['cache'] = array(
@@ -279,5 +279,5 @@ if(defined('SAE_TMP_PATH'))
 
 }
 return $config;
- * 
+ *
  */

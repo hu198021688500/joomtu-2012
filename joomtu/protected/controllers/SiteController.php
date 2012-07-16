@@ -28,7 +28,7 @@ class SiteController extends Controller {
         //echo Yii::app()->user->name;
         // renders the view file 'protected/views/site/index.php'
         // using the default layout 'protected/views/layouts/main.php'
-        $this->redirect('/rel/index');
+        //$this->redirect('/rel/index');
         $this->render('index');
     }
 
