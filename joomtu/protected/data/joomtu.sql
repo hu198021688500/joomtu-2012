@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.2
+-- version 3.4.10.1
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 15 日 22:34
--- 服务器版本: 5.5.24-0ubuntu0.12.04.1
+-- 生成日期: 2012 年 07 月 16 日 13:32
+-- 服务器版本: 5.5.24
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
@@ -3625,16 +3625,16 @@ CREATE TABLE IF NOT EXISTS `jt_menu_cat` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_msg_detail`
+-- 表的结构 `jt_msg`
 --
 
-CREATE TABLE IF NOT EXISTS `jt_msg_detail` (
+CREATE TABLE IF NOT EXISTS `jt_msg` (
   `mid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID标识',
   `title` varchar(50) NOT NULL COMMENT '站内信主题',
   `content` text NOT NULL COMMENT '消息正文',
   `status` tinyint(1) unsigned DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
   PRIMARY KEY (`mid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -3643,15 +3643,18 @@ CREATE TABLE IF NOT EXISTS `jt_msg_detail` (
 --
 
 CREATE TABLE IF NOT EXISTS `jt_msg_inbox` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'key',
   `uid` int(10) unsigned NOT NULL COMMENT '收件人UID',
   `from_uid` int(10) unsigned NOT NULL COMMENT '发件人',
   `msg_id` int(10) unsigned NOT NULL COMMENT '站内信ID',
-  `msg_title` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+  `msg_title` varchar(50) DEFAULT NULL COMMENT '站内信的标题',
   `update_time` int(10) unsigned NOT NULL COMMENT '更新时间',
   `status` tinyint(1) unsigned DEFAULT '0' COMMENT '站内信状态，0:未读，1:已读，2:已删除',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='用户站内信收件箱';
+  PRIMARY KEY (`id`),
+  KEY `FK_jt_msg_inbox_msg_id` (`msg_id`),
+  KEY `FK_jt_msg_inbox_form_uid` (`from_uid`),
+  KEY `FK_jt_msg_inbox_uid` (`uid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -3668,9 +3671,11 @@ CREATE TABLE IF NOT EXISTS `jt_msg_outbox` (
   `send_type` tinyint(1) unsigned DEFAULT '1' COMMENT '站内信发送类型，1:自定义2:组内',
   `group_id` int(10) unsigned DEFAULT NULL COMMENT '当send_type为2时，设置组ID',
   `send_time` int(10) unsigned NOT NULL COMMENT '发送时间',
-  `status` tinyint(1) unsigned DEFAULT '1' COMMENT '状态',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=1 ;
+  `status` tinyint(1) unsigned DEFAULT '0' COMMENT '状态',
+  PRIMARY KEY (`id`),
+  KEY `FK_jt_msg_outbox_uid` (`uid`),
+  KEY `FK_jt_msg_outbox_msg_id` (`msg_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -3740,7 +3745,7 @@ CREATE TABLE IF NOT EXISTS `jt_user_ext` (
   `invitecode` char(32) DEFAULT NULL COMMENT '邀请码',
   `activationcode` char(32) DEFAULT NULL COMMENT '激活码',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户扩展信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户扩展信息';
 
 -- --------------------------------------------------------
 
@@ -3782,7 +3787,8 @@ INSERT INTO `jt_user_grade` (`gid`, `name`, `status`) VALUES
 CREATE TABLE IF NOT EXISTS `jt_user_merchant_ext` (
   `mid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '商户ID',
   `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
-  PRIMARY KEY (`mid`)
+  PRIMARY KEY (`mid`),
+  KEY `FK_jt_user_merchant_ext_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商户扩展表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3793,7 +3799,9 @@ CREATE TABLE IF NOT EXISTS `jt_user_merchant_ext` (
 
 CREATE TABLE IF NOT EXISTS `jt_user_photo` (
   `pid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '相册ID',
-  PRIMARY KEY (`pid`)
+  `uid` int(10) unsigned NOT NULL COMMENT '所属用户',
+  PRIMARY KEY (`pid`),
+  KEY `FK_jt_user_photo_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户相册表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3804,7 +3812,9 @@ CREATE TABLE IF NOT EXISTS `jt_user_photo` (
 
 CREATE TABLE IF NOT EXISTS `jt_user_photo_pic` (
   `pid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '相册图片ID',
-  PRIMARY KEY (`pid`)
+  `uid` int(10) unsigned NOT NULL COMMENT '所属用户',
+  PRIMARY KEY (`pid`),
+  KEY `FK_jt_user_photo_pic_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户相册图片表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3815,7 +3825,13 @@ CREATE TABLE IF NOT EXISTS `jt_user_photo_pic` (
 
 CREATE TABLE IF NOT EXISTS `jt_user_rel` (
   `rid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '关系ID',
-  PRIMARY KEY (`rid`)
+  `from_uid` int(10) unsigned NOT NULL,
+  `to_uid` int(10) unsigned NOT NULL,
+  `name` varchar(10) NOT NULL,
+  `create_time` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`rid`),
+  KEY `FK_jt_user_rel_from_uid` (`from_uid`),
+  KEY `FK_jt_user_rel_to_uid` (`to_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户关系表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3854,7 +3870,8 @@ INSERT INTO `jt_user_role` (`rid`, `name`, `show_name`, `description`, `create_t
 CREATE TABLE IF NOT EXISTS `jt_user_stores_ext` (
   `sid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '门店ID',
   `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
-  PRIMARY KEY (`sid`)
+  PRIMARY KEY (`sid`),
+  KEY `FK_jt_user_stores_ext_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='门店扩展表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -3875,7 +3892,64 @@ CREATE TABLE IF NOT EXISTS `YiiSession` (
 --
 
 INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
-('9vro2j1894uuag3vno877fmna1', 1333956411, '');
+('anlbcdnsl9evcf5e3a3ftinl55', 1342409993, 'gii__returnUrl|s:10:"/gii/model";'),
+('a8d2ffad3ucvtvg4pjvfap1sa6', 1342410149, 'gii__returnUrl|s:10:"/gii/model";gii__id|s:5:"yiier";gii__name|s:5:"yiier";gii__states|a:0:{}');
+
+--
+-- 限制导出的表
+--
+
+--
+-- 限制表 `jt_msg_inbox`
+--
+ALTER TABLE `jt_msg_inbox`
+  ADD CONSTRAINT `FK_jt_msg_inbox_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_msg_inbox_form_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_msg_inbox_msg_id` FOREIGN KEY (`msg_id`) REFERENCES `jt_msg` (`mid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_msg_outbox`
+--
+ALTER TABLE `jt_msg_outbox`
+  ADD CONSTRAINT `FK_jt_msg_outbox_msg_id` FOREIGN KEY (`msg_id`) REFERENCES `jt_msg` (`mid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_msg_outbox_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_user_ext`
+--
+ALTER TABLE `jt_user_ext`
+  ADD CONSTRAINT `FK_jt_user_ext_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- 限制表 `jt_user_merchant_ext`
+--
+ALTER TABLE `jt_user_merchant_ext`
+  ADD CONSTRAINT `FK_jt_user_merchant_ext_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- 限制表 `jt_user_photo`
+--
+ALTER TABLE `jt_user_photo`
+  ADD CONSTRAINT `FK_jt_user_photo_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_user_photo_pic`
+--
+ALTER TABLE `jt_user_photo_pic`
+  ADD CONSTRAINT `FK_jt_user_photo_pic_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_user_rel`
+--
+ALTER TABLE `jt_user_rel`
+  ADD CONSTRAINT `FK_jt_user_rel_to_uid` FOREIGN KEY (`to_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_user_rel_from_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_user_stores_ext`
+--
+ALTER TABLE `jt_user_stores_ext`
+  ADD CONSTRAINT `FK_jt_user_stores_ext_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

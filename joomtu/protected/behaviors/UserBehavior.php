@@ -10,7 +10,7 @@
  * @license (http://www.apache.org/licenses/LICENSE-2.0)
  *
  * @$Id$
- * 
+ *
  */
 
 /**
@@ -19,7 +19,19 @@
  * @author hadoop
  */
 class UserBehavior {
-//put your code here
+
+    public function getLoginUserId() {
+        return 1;
+    }
+
+    public function isExistence($uid) {
+        return $uid > 0;
+    }
+
+    public function getUserDetail($uid) {
+        return User::model()->findByPk($uid);
+    }
+
 }
 
 ?>
