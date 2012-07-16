@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 16 日 13:32
+-- 生成日期: 2012 年 07 月 16 日 14:33
 -- 服务器版本: 5.5.24
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
@@ -3535,6 +3535,41 @@ CREATE TABLE IF NOT EXISTS `jt_assignments` (
 -- --------------------------------------------------------
 
 --
+-- 表的结构 `jt_friend_group`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_friend_group` (
+  `gid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '组ID',
+  `name` varchar(10) NOT NULL COMMENT '好友分组的名称',
+  `count` int(10) unsigned DEFAULT '0' COMMENT '人员数量',
+  `create_uid` int(10) unsigned NOT NULL COMMENT '创建者',
+  `create_time` int(10) unsigned NOT NULL COMMENT '创建时间',
+  `status` tinyint(1) unsigned DEFAULT '0' COMMENT '状态',
+  PRIMARY KEY (`gid`),
+  KEY `FK_jt_friend_group_create_uid` (`create_uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_friend_group_rel`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_friend_group_rel` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '好友分组',
+  `gid` int(10) unsigned NOT NULL COMMENT '组ID',
+  `uid` int(10) unsigned NOT NULL COMMENT '用户ID',
+  `add_time` int(10) unsigned NOT NULL COMMENT '加入时间',
+  `flag` tinyint(1) unsigned DEFAULT '0' COMMENT '身份，0:群众',
+  `status` tinyint(1) unsigned DEFAULT '0' COMMENT '状态',
+  PRIMARY KEY (`id`),
+  KEY `FK_jt_friend_group_rel_uid` (`uid`),
+  KEY `FK_jt_friend_group_rel_gid` (`gid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- 表的结构 `jt_itemchildren`
 --
 
@@ -3898,6 +3933,19 @@ INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
 --
 -- 限制导出的表
 --
+
+--
+-- 限制表 `jt_friend_group`
+--
+ALTER TABLE `jt_friend_group`
+  ADD CONSTRAINT `FK_jt_friend_group_create_uid` FOREIGN KEY (`create_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+
+--
+-- 限制表 `jt_friend_group_rel`
+--
+ALTER TABLE `jt_friend_group_rel`
+  ADD CONSTRAINT `FK_jt_friend_group_rel_gid` FOREIGN KEY (`gid`) REFERENCES `jt_friend_group` (`gid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_friend_group_rel_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
 
 --
 -- 限制表 `jt_msg_inbox`
