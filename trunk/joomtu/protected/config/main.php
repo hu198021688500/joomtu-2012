@@ -8,7 +8,7 @@ return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'name' => 'Joomtu 2012',
     //网站语言 多语言设置，对应 protected/messages/zh_cn
-    'language' => 'zh_cn',
+    //'language' => 'zh_cn',
     //时区设置
     'timeZone' => 'Asia/Shanghai',
     //默认访问 即访问index.php时会自动跳转到某个controller
@@ -17,6 +17,7 @@ return array(
     'preload' => array('log'),
     // autoloading model and component classes
     'import' => array(
+        'application.forms.*',
         'application.models.*',
         'application.behaviors.*',
         'application.components.*',
@@ -127,7 +128,7 @@ return array(
             'emulatePrepare' => true,
             'enableParamLogging' => YII_DEBUG,
             'schemaCachingDuration' => 54000, // 15 minutes,
-//            'connectionString' => 'mysql:host=192.168.20.30;port=3306;dbname=mocube',
+//            'connectionString' => 'mysql:host=192.168.20.29;port=3306;dbname=mocube',
 //            'emulatePrepare' => true,
 //            'enableParamLogging' => true,
 //            'username' => 'mocube',

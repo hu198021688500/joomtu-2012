@@ -10,7 +10,7 @@
  * @license (http://www.apache.org/licenses/LICENSE-2.0)
  *
  * @$Id$
- * 
+ *
  */
 class UserIdentity extends CUserIdentity {
 
@@ -26,6 +26,7 @@ class UserIdentity extends CUserIdentity {
      * @return boolean whether authentication succeeds.
      */
     public function authenticate() {
+        //$user = User::model()->find('email = ?', array($this->username));
         $user = User::model()->find('LOWER(email)=?', array(strtolower($this->username)));
         if ($user === null) {
             //throw new CHttpException(404,'The requested page does not exist.');

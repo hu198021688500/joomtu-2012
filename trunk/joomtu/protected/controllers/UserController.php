@@ -10,7 +10,7 @@
  * @license (http://www.apache.org/licenses/LICENSE-2.0)
  *
  * @$Id$
- * 
+ *
  */
 class UserController extends Controller {
 
@@ -93,6 +93,33 @@ class UserController extends Controller {
         }
         // display the login form
         $this->render('login', array('model' => $model));
+    }
+
+    public function actionFindpass() {
+        $flag = false;
+        $message = '';
+        $model = new UserFindPassForm();
+        // if it is ajax validation request
+        if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-find-pass-form') {
+            echo CActiveForm::validate($model);
+            Yii::app()->end();
+        }
+        // collect user input data
+        if (isset($_POST['UserFindPassForm'])) {
+            $model->attributes = $_POST['UserFindPassForm'];
+            // validate user input and redirect to the previous page if valid
+            if ($model->validate() && $model->sendMail()) {
+                $flag = true;
+                //Yii::log("Successful login of user: " . Yii::app()->user->id, "info", "application.controllers.SiteController");
+                //$this->redirect(Yii::app()->user->returnUrl);
+            } else {
+                $flag = false;
+                $message = '';
+                Yii::log("Failed login attempt", "warning", "application.controllers.SiteController");
+            }
+        }
+        // display the login form
+        $this->render('findpass', array('model' => $model, 'flag' => $flag, 'message' => $message));
     }
 
     public function actionLogout() {

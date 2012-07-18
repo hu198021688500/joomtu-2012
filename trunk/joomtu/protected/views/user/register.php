@@ -1,5 +1,5 @@
 <?php
-$this->pageTitle=Yii::app()->name . ' - Register';
+$this->pageTitle='Register - ' . Yii::app()->name;
 $this->breadcrumbs=array('Register');
 ?>
 
@@ -8,7 +8,7 @@ $this->breadcrumbs=array('Register');
 <p>Please fill out the following form with your login credentials:</p>
 
 <div class="form">
-<?php 
+<?php
 $form=$this->beginWidget('CActiveForm',array(
 	'id'=>'user-register-form',
 	'enableAjaxValidation'=>true,
@@ -21,7 +21,7 @@ $form=$this->beginWidget('CActiveForm',array(
 	<p class="note">Fields with <span class="required">*</span> are required.</p>
 
 	<?php echo $form->errorSummary($model);?>
-	
+
 	<div class="row">
 		<?php echo $form->labelEx($model,'email');?>
 		<?php echo $form->textField($model,'email',array('maxlength'=>32));?>
@@ -33,19 +33,19 @@ $form=$this->beginWidget('CActiveForm',array(
 		<?php echo $form->passwordField($model,'password',array('maxlength'=>32));?>
 		<?php echo $form->error($model,'password',array(),false);?>
 	</div>
-	
+
 	<div class="row">
 		<?php echo $form->labelEx($model,'confirmPwd');?>
 		<?php echo $form->passwordField($model,'confirmPwd',array('maxlength'=>32));?>
 		<?php echo $form->error($model,'confirmPwd',array(),false);?>
 	</div>
-	
+
 	<div class="row">
 		<?php echo $form->labelEx($model,'name');?>
 		<?php echo $form->textField($model,'name',array('maxlength'=>10));?>
 		<?php echo $form->error($model,'name',array(),false);?>
 	</div>
-	
+
 	<?php if(Yii::app()->params['registerCaptcha']&&CCaptcha::checkRequirements()){?>
 	<div class="row">
 		<?php echo $form->labelEx($model,'verifyCode');?>

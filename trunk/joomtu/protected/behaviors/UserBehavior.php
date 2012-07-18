@@ -14,7 +14,7 @@
  */
 
 /**
- * Description of UserBehavior
+ * 用户
  *
  * @author hadoop
  */
