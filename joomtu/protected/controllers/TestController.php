@@ -10,7 +10,7 @@
  * @license (http://www.apache.org/licenses/LICENSE-2.0)
  *
  * @$Id$
- * 
+ *
  */
 
 /**
@@ -57,6 +57,12 @@ class TestController extends Controller {
             $area->createArea($value['parent_id'], $order, array('name' => $value['area_name']));
         }
         echo $area->analyze();
+    }
+
+    public function actionGetpwd(){
+        $user = new User();
+        echo $user->generateSalt();echo '<br />';
+        echo $user->hashPassword('admin', '4ef59e14ac563');
     }
 
 }

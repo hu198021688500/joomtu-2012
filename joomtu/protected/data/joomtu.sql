@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 16 日 16:11
+-- 生成日期: 2012 年 07 月 18 日 18:06
 -- 服务器版本: 5.5.24
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
@@ -3669,7 +3669,7 @@ CREATE TABLE IF NOT EXISTS `jt_msg` (
   `content` text NOT NULL COMMENT '消息正文',
   `status` tinyint(1) unsigned DEFAULT '0' COMMENT '0：正常，1：被发件人删除 ，2：被管理员删除',
   PRIMARY KEY (`mid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=COMPACT COMMENT='站内信内容表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3689,7 +3689,7 @@ CREATE TABLE IF NOT EXISTS `jt_msg_inbox` (
   KEY `FK_jt_msg_inbox_msg_id` (`msg_id`),
   KEY `FK_jt_msg_inbox_form_uid` (`from_uid`),
   KEY `FK_jt_msg_inbox_uid` (`uid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3710,7 +3710,7 @@ CREATE TABLE IF NOT EXISTS `jt_msg_outbox` (
   PRIMARY KEY (`id`),
   KEY `FK_jt_msg_outbox_uid` (`uid`),
   KEY `FK_jt_msg_outbox_msg_id` (`msg_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 COMMENT='用户站内信发件箱' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3927,8 +3927,7 @@ CREATE TABLE IF NOT EXISTS `YiiSession` (
 --
 
 INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
-('anlbcdnsl9evcf5e3a3ftinl55', 1342409993, 'gii__returnUrl|s:10:"/gii/model";'),
-('a8d2ffad3ucvtvg4pjvfap1sa6', 1342410149, 'gii__returnUrl|s:10:"/gii/model";gii__id|s:5:"yiier";gii__name|s:5:"yiier";gii__states|a:0:{}');
+('libt935r6635lj04s7li06r164', 1342607402, 'Yii.CCaptchaAction.5b3d9fd3.user.captcha|s:6:"jomicr";Yii.CCaptchaAction.5b3d9fd3.user.captchacount|i:3;');
 
 --
 -- 限制导出的表
@@ -3951,9 +3950,9 @@ ALTER TABLE `jt_friend_group_rel`
 -- 限制表 `jt_msg_inbox`
 --
 ALTER TABLE `jt_msg_inbox`
-  ADD CONSTRAINT `FK_jt_msg_inbox_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
   ADD CONSTRAINT `FK_jt_msg_inbox_form_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `FK_jt_msg_inbox_msg_id` FOREIGN KEY (`msg_id`) REFERENCES `jt_msg` (`mid`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FK_jt_msg_inbox_msg_id` FOREIGN KEY (`msg_id`) REFERENCES `jt_msg` (`mid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_msg_inbox_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
 
 --
 -- 限制表 `jt_msg_outbox`
@@ -3990,8 +3989,8 @@ ALTER TABLE `jt_user_photo_pic`
 -- 限制表 `jt_user_rel`
 --
 ALTER TABLE `jt_user_rel`
-  ADD CONSTRAINT `FK_jt_user_rel_to_uid` FOREIGN KEY (`to_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `FK_jt_user_rel_from_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FK_jt_user_rel_from_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_jt_user_rel_to_uid` FOREIGN KEY (`to_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
 
 --
 -- 限制表 `jt_user_stores_ext`
