@@ -57,33 +57,35 @@ class UserController extends Controller {
 
     public function actionRegister() {
         $model = new UserRegisterForm();
-        // if it is ajax validation request
+
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-register-form') {
             echo CActiveForm::validate($model);
             Yii::app()->end();
         }
-        // collect user input data
+
         if (isset($_POST['UserRegisterForm'])) {
             $model->attributes = $_POST['UserRegisterForm'];
             if ($model->validate() && $model->saveUser()) {
                 $this->redirect(Yii::app()->homeUrl);
             }
         }
-        // display the register form
+
         $this->render('register', array('model' => $model));
     }
 
+    /**
+     * user login
+     */
     public function actionLogin() {
         $model = new UserLoginForm;
-        // if it is ajax validation request
+
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-login-form') {
             echo CActiveForm::validate($model);
             Yii::app()->end();
         }
-        // collect user input data
+
         if (isset($_POST['UserLoginForm'])) {
             $model->attributes = $_POST['UserLoginForm'];
-            // validate user input and redirect to the previous page if valid
             if ($model->validate() && $model->login()) {
                 Yii::log("Successful login of user: " . Yii::app()->user->id, "info", "application.controllers.SiteController");
                 $this->redirect(Yii::app()->user->returnUrl);
@@ -91,42 +93,52 @@ class UserController extends Controller {
                 Yii::log("Failed login attempt", "warning", "application.controllers.SiteController");
             }
         }
-        // display the login form
+
         $this->render('login', array('model' => $model));
     }
 
-    public function actionFindpass() {
-        $flag = false;
-        $message = '';
+    /**
+     * find password
+     */
+    public function actionFindPass() {
         $model = new UserFindPassForm();
-        // if it is ajax validation request
+
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-find-pass-form') {
             echo CActiveForm::validate($model);
             Yii::app()->end();
         }
-        // collect user input data
+
         if (isset($_POST['UserFindPassForm'])) {
             $model->attributes = $_POST['UserFindPassForm'];
-            // validate user input and redirect to the previous page if valid
-            if ($model->validate() && $model->sendMail()) {
-                $flag = true;
-                //Yii::log("Successful login of user: " . Yii::app()->user->id, "info", "application.controllers.SiteController");
-                //$this->redirect(Yii::app()->user->returnUrl);
-            } else {
-                $flag = false;
-                $message = '';
-                Yii::log("Failed login attempt", "warning", "application.controllers.SiteController");
+            if ($model->validate()) {
+                if ($model->sendMailUse163()) {
+                    Yii::app()->user->setFlash('send_email_status', true);
+                } else {
+                    Yii::app()->user->setFlash('send_email_status', false);
+                }
+                Yii::app()->user->setFlash('send_email_address', $model->email);
+                $this->refresh();
             }
         }
-        // display the login form
-        $this->render('findpass', array('model' => $model, 'flag' => $flag, 'message' => $message));
+
+        $this->render('findpass', array('model' => $model));
     }
 
+    public function actionResetPwd() {
+
+    }
+
+    /**
+     * user logout
+     */
     public function actionLogout() {
         Yii::app()->user->logout();
         $this->redirect(Yii::app()->homeUrl);
     }
 
+    /**
+     * service licence
+     */
     public function actionLicence() {
         $this->render('licence');
     }
