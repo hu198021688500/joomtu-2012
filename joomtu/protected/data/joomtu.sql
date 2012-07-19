@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 18 日 18:06
+-- 生成日期: 2012 年 07 月 19 日 18:23
 -- 服务器版本: 5.5.24
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
@@ -3720,11 +3720,11 @@ CREATE TABLE IF NOT EXISTS `jt_msg_outbox` (
 
 CREATE TABLE IF NOT EXISTS `jt_user` (
   `uid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `username` varchar(15) NOT NULL COMMENT '用户账号',
   `email` varchar(30) NOT NULL COMMENT 'Email地址',
   `password` char(32) NOT NULL COMMENT '密码，明文6-16个字符',
-  `old_password` char(32) NOT NULL COMMENT '旧密码，密码明文',
   `salt` char(15) NOT NULL COMMENT '密码保护散列值，前四位是密码明文的前后两个字符之和，后四位是随机码',
-  `name` varchar(15) DEFAULT NULL COMMENT '用户昵称',
+  `old_password` char(32) DEFAULT NULL COMMENT '旧密码，密码明文',
   `sex` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '性别，取值0：未知 1：女 2：男',
   `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
   `mobile` char(11) DEFAULT NULL COMMENT '手机号码',
@@ -3751,19 +3751,19 @@ CREATE TABLE IF NOT EXISTS `jt_user` (
 -- 转存表中的数据 `jt_user`
 --
 
-INSERT INTO `jt_user` (`uid`, `email`, `password`, `old_password`, `salt`, `name`, `sex`, `avatar`, `mobile`, `birthday`, `address`, `rid`, `nid`, `status`, `config`, `signature`, `integral`, `reg_time`, `reg_ip`, `reg_source`, `last_login_time`, `last_login_ip`, `login_fail_times`, `reset_pwd_time`, `update_time`) VALUES
-(1, 'admin@admin.com', '8cc029e8016f21b06e9e862538bcb24f', '', '4ef59e14ac563', '胡国兵', 0, NULL, NULL, NULL, '0', 1, 1, 0, NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0, 0),
-(2, 'hu1980216885000@163.com', '96a72bd86e8dcc6b3ca24882c2381d49', '', '4f56ed66a689a', '胡世伟', 0, NULL, NULL, NULL, '0', 2, 2, 0, NULL, NULL, 0, 1331096934, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331096934),
-(3, 'hu1980216885001@163.com', '451e40f6467d8c8789683b7dae28f127', '', '4f570ec08497a', '朱大香', 0, NULL, NULL, NULL, '0', 2, 3, 0, NULL, NULL, 0, 1331105472, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105472),
-(4, 'hu1980216885002@163.com', '7c6cd0dc46ee17217de5772c4c14e567', '', '4f570f0415f22', '胡灵义', 0, NULL, NULL, NULL, '0', 2, 4, 0, NULL, NULL, 0, 1331105540, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105540),
-(5, 'hu1980216885003@163.com', '17bf70af6142c54634207c6acb6a55e9', '', '4f5710a181132', '胡万华', 0, NULL, NULL, NULL, '0', 2, 5, 0, NULL, NULL, 0, 1331105953, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105953),
-(6, 'hu1980216885004@163.com', 'b0a11b3dd37205dfee861d733cf092b7', '', '4f5710d228a43', '胡世林', 0, NULL, NULL, NULL, '0', 2, 6, 0, NULL, NULL, 0, 1331106002, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331106002),
-(7, 'hu1980216885005@163.com', 'ac0aa070543e9b7ca7bb9ae17014d317', '', '4f58466409e04', '胡万昌', 0, NULL, NULL, NULL, '0', 2, 7, 0, NULL, NULL, 0, 1331185252, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331185252),
-(8, 'hu1980216885006@163.com', '7a0cb7e17e97735e95a07f968f23ad32', '', '4f585147a4774', '胡世俊', 0, NULL, NULL, NULL, '0', 2, 8, 0, NULL, NULL, 0, 1331188039, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188039),
-(9, 'hu1980216885007@163.com', '64b7a3ba29e34b28780f8a5f5a737a34', '', '4f5852ede12ff', '胡义', 0, NULL, NULL, NULL, '0', 2, 9, 0, NULL, NULL, 0, 1331188461, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188461),
-(10, 'hu1980216885008@163.com', '3392912311ab7f5e3be366f3c6e2dc60', '', '4f58535f2eacd', '胡军', 0, NULL, NULL, NULL, '0', 2, 10, 0, NULL, NULL, 0, 1331188575, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188575),
-(11, 'hu1980216885009@163.com', '3d03dcbfb1d0487139635cf72d1cb968', '', '4f58542fad864', '胡军', 0, NULL, NULL, NULL, '0', 2, 11, 0, NULL, NULL, 0, 1331188783, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188783),
-(12, 'hu1980216885010@163.com', '9a4cd532b7f925e25e46170189782948', '', '4f5873b20b1b2', '胡世品', 0, NULL, NULL, NULL, '0', 2, 12, 0, NULL, NULL, 0, 1331196850, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331196850);
+INSERT INTO `jt_user` (`uid`, `username`, `email`, `password`, `salt`, `old_password`, `sex`, `avatar`, `mobile`, `birthday`, `address`, `rid`, `nid`, `status`, `config`, `signature`, `integral`, `reg_time`, `reg_ip`, `reg_source`, `last_login_time`, `last_login_ip`, `login_fail_times`, `reset_pwd_time`, `update_time`) VALUES
+(1, 'admin', 'admin@admin.com', '8cc029e8016f21b06e9e862538bcb24f', '4ef59e14ac563', NULL, 0, NULL, NULL, NULL, '0', 1, 1, 0, NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0, 0),
+(2, 'hu1980216885000', 'hu1980216885000@163.com', '96a72bd86e8dcc6b3ca24882c2381d49', '4f56ed66a689a', NULL, 0, NULL, NULL, NULL, '0', 2, 2, 0, NULL, NULL, 0, 1331096934, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331096934),
+(3, 'hu1980216885001', 'hu1980216885001@163.com', '451e40f6467d8c8789683b7dae28f127', '4f570ec08497a', NULL, 0, NULL, NULL, NULL, '0', 2, 3, 0, NULL, NULL, 0, 1331105472, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105472),
+(4, 'hu1980216885002', 'hu1980216885002@163.com', '7c6cd0dc46ee17217de5772c4c14e567', '4f570f0415f22', NULL, 0, NULL, NULL, NULL, '0', 2, 4, 0, NULL, NULL, 0, 1331105540, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105540),
+(5, 'hu1980216885003', 'hu1980216885003@163.com', '17bf70af6142c54634207c6acb6a55e9', '4f5710a181132', NULL, 0, NULL, NULL, NULL, '0', 2, 5, 0, NULL, NULL, 0, 1331105953, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331105953),
+(6, 'hu1980216885004', 'hu1980216885004@163.com', 'b0a11b3dd37205dfee861d733cf092b7', '4f5710d228a43', NULL, 0, NULL, NULL, NULL, '0', 2, 6, 0, NULL, NULL, 0, 1331106002, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331106002),
+(7, 'hu1980216885005', 'hu1980216885005@163.com', 'ac0aa070543e9b7ca7bb9ae17014d317', '4f58466409e04', NULL, 0, NULL, NULL, NULL, '0', 2, 7, 0, NULL, NULL, 0, 1331185252, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331185252),
+(8, 'hu1980216885006', 'hu1980216885006@163.com', '7a0cb7e17e97735e95a07f968f23ad32', '4f585147a4774', NULL, 0, NULL, NULL, NULL, '0', 2, 8, 0, NULL, NULL, 0, 1331188039, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188039),
+(9, 'hu1980216885007', 'hu1980216885007@163.com', '64b7a3ba29e34b28780f8a5f5a737a34', '4f5852ede12ff', NULL, 0, NULL, NULL, NULL, '0', 2, 9, 0, NULL, NULL, 0, 1331188461, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188461),
+(10, 'hu1980216885008', 'hu1980216885008@163.com', '3392912311ab7f5e3be366f3c6e2dc60', '4f58535f2eacd', NULL, 0, NULL, NULL, NULL, '0', 2, 10, 0, NULL, NULL, 0, 1331188575, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188575),
+(11, 'hu1980216885009', 'hu1980216885009@163.com', '3d03dcbfb1d0487139635cf72d1cb968', '4f58542fad864', NULL, 0, NULL, NULL, NULL, '0', 2, 11, 0, NULL, NULL, 0, 1331188783, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331188783),
+(12, 'hu1980216885010', 'hu1980216885010@163.com', '9a4cd532b7f925e25e46170189782948', '4f5873b20b1b2', NULL, 0, NULL, NULL, NULL, '0', 2, 12, 0, NULL, NULL, 0, 1331196850, '127.0.0.1', NULL, 0, NULL, 0, 0, 1331196850);
 
 -- --------------------------------------------------------
 
@@ -3927,7 +3927,8 @@ CREATE TABLE IF NOT EXISTS `YiiSession` (
 --
 
 INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
-('libt935r6635lj04s7li06r164', 1342607402, 'Yii.CCaptchaAction.5b3d9fd3.user.captcha|s:6:"jomicr";Yii.CCaptchaAction.5b3d9fd3.user.captchacount|i:3;');
+('27krjihuou1r2lp2am3jtjfng6', 1342670971, 'gii__returnUrl|s:4:"/gii";'),
+('oao77rdb9u43v3vi2hvtmidei1', 1342671220, 'gii__returnUrl|s:4:"/gii";gii__id|s:5:"yiier";gii__name|s:5:"yiier";gii__states|a:0:{}');
 
 --
 -- 限制导出的表
