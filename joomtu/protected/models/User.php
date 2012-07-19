@@ -5,11 +5,11 @@
  *
  * The followings are the available columns in table '{{user}}':
  * @property string $uid
+ * @property string $username
  * @property string $email
  * @property string $password
- * @property string $old_password
  * @property string $salt
- * @property string $name
+ * @property string $old_password
  * @property integer $sex
  * @property string $avatar
  * @property string $mobile
@@ -31,6 +31,8 @@
  * @property string $update_time
  *
  * The followings are the available model relations:
+ * @property FriendGroup[] $friendGroups
+ * @property FriendGroupRel[] $friendGroupRels
  * @property MsgInbox[] $msgInboxes
  * @property MsgInbox[] $msgInboxes1
  * @property MsgOutbox[] $msgOutboxes
@@ -67,11 +69,11 @@ class User extends CActiveRecord {
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return array(
-            array('email, password, old_password, salt', 'required'),
+            array('username, email, password, salt', 'required'),
             array('sex, rid, status, login_fail_times, reset_pwd_time', 'numerical', 'integerOnly' => true),
+            array('username, salt', 'length', 'max' => 15),
             array('email', 'length', 'max' => 30),
             array('password, old_password', 'length', 'max' => 32),
-            array('salt, name', 'length', 'max' => 15),
             array('avatar', 'length', 'max' => 255),
             array('mobile', 'length', 'max' => 11),
             array('birthday', 'length', 'max' => 12),
@@ -82,7 +84,7 @@ class User extends CActiveRecord {
             array('reg_source', 'length', 'max' => 5),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            array('uid, email, password, old_password, salt, name, sex, avatar, mobile, birthday, address, rid, nid, status, config, signature, integral, reg_time, reg_ip, reg_source, last_login_time, last_login_ip, login_fail_times, reset_pwd_time, update_time', 'safe', 'on' => 'search'),
+            array('uid, username, email, password, salt, old_password, sex, avatar, mobile, birthday, address, rid, nid, status, config, signature, integral, reg_time, reg_ip, reg_source, last_login_time, last_login_ip, login_fail_times, reset_pwd_time, update_time', 'safe', 'on' => 'search'),
         );
     }
 
@@ -93,15 +95,17 @@ class User extends CActiveRecord {
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
         return array(
-            'msgInboxes' => array(self::HAS_MANY, 'MsgInbox', 'uid'),
-            'msgInboxes1' => array(self::HAS_MANY, 'MsgInbox', 'from_uid'),
+            'friendGroups' => array(self::HAS_MANY, 'FriendGroup', 'create_uid'),
+            'friendGroupRels' => array(self::HAS_MANY, 'FriendGroupRel', 'uid'),
+            'msgInboxes' => array(self::HAS_MANY, 'MsgInbox', 'from_uid'),
+            'msgInboxes1' => array(self::HAS_MANY, 'MsgInbox', 'uid'),
             'msgOutboxes' => array(self::HAS_MANY, 'MsgOutbox', 'uid'),
             'userExt' => array(self::HAS_ONE, 'UserExt', 'uid'),
             'userMerchantExts' => array(self::HAS_MANY, 'UserMerchantExt', 'uid'),
             'userPhotos' => array(self::HAS_MANY, 'UserPhoto', 'uid'),
             'userPhotoPics' => array(self::HAS_MANY, 'UserPhotoPic', 'uid'),
-            'userRels' => array(self::HAS_MANY, 'UserRel', 'to_uid'),
-            'userRels1' => array(self::HAS_MANY, 'UserRel', 'from_uid'),
+            'userRels' => array(self::HAS_MANY, 'UserRel', 'from_uid'),
+            'userRels1' => array(self::HAS_MANY, 'UserRel', 'to_uid'),
             'userStoresExts' => array(self::HAS_MANY, 'UserStoresExt', 'uid'),
         );
     }
@@ -112,11 +116,11 @@ class User extends CActiveRecord {
     public function attributeLabels() {
         return array(
             'uid' => 'Uid',
+            'username' => 'Username',
             'email' => 'Email',
             'password' => 'Password',
-            'old_password' => 'Old Password',
             'salt' => 'Salt',
-            'name' => 'Name',
+            'old_password' => 'Old Password',
             'sex' => 'Sex',
             'avatar' => 'Avatar',
             'mobile' => 'Mobile',
@@ -150,11 +154,11 @@ class User extends CActiveRecord {
         $criteria = new CDbCriteria;
 
         $criteria->compare('uid', $this->uid, true);
+        $criteria->compare('username', $this->username, true);
         $criteria->compare('email', $this->email, true);
         $criteria->compare('password', $this->password, true);
-        $criteria->compare('old_password', $this->old_password, true);
         $criteria->compare('salt', $this->salt, true);
-        $criteria->compare('name', $this->name, true);
+        $criteria->compare('old_password', $this->old_password, true);
         $criteria->compare('sex', $this->sex);
         $criteria->compare('avatar', $this->avatar, true);
         $criteria->compare('mobile', $this->mobile, true);
@@ -180,11 +184,12 @@ class User extends CActiveRecord {
                 ));
     }
 
-    /**
+/**
      * 验证密码
      * @param string $password
      * @return boolean
      */
+
     public function validatePassword($password) {
         return $this->hashPassword($password, $this->salt) === $this->password;
     }
