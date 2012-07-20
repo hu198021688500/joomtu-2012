@@ -59,10 +59,31 @@ class TestController extends Controller {
         echo $area->analyze();
     }
 
-    public function actionGetpwd(){
+    public function actionGetpwd() {
         $user = new User();
-        echo $user->generateSalt();echo '<br />';
+        echo $user->generateSalt();
+        echo '<br />';
         echo $user->hashPassword('admin', '4ef59e14ac563');
+    }
+
+    public function actionChart1() {
+        $this->layout = false;
+        $this->render('chart1');
+    }
+
+    public function actionChart2() {
+        $this->layout = false;
+        $this->render('chart2');
+    }
+
+    public function actionChart3() {
+        $this->layout = false;
+        $this->render('chart3');
+    }
+
+    public function actionChart4() {
+        $this->layout = false;
+        $this->render('chart4');
     }
 
 }
