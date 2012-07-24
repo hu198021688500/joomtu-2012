@@ -158,5 +158,3 @@ class MessageBehavior extends ErrorBehavior {
     }
 
 }
-
-?>
