@@ -12,4 +12,12 @@
  * $Id$
  *
  */
-?>
+return array(
+    'connectionString' => 'mysql:host=192.168.35.188;port=3306;dbname=joomtu',
+    'emulatePrepare' => true,
+    'enableParamLogging' => true,
+    'username' => 'root',
+    'password' => 'admin',
+    'charset' => 'utf8',
+    'tablePrefix' => 'jt_'
+);
