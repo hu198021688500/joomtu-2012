@@ -18,193 +18,248 @@
  */
 class Mysql {
 
-    private $connectionString;
-    private $username = '';
-    private $password = '';
-    private $instance = null;
-    private $DB = null;
-    private $version = 0;
-    //
-    public static $stmt = null;
-    public static $querycount = 0;
-    public static $DB = null;
-    public static $version = 0;
-    public static $debug = 0;
+    private static $instance;
+    public $dsn;
+    public $dbuser;
+    public $dbpass;
+    public $sth;
+    public $dbh;
 
     private function __construct($config) {
-        $this->connectionString = $config['dsn'];
-        $this->username = $config['username'];
-        $this->password = $password['config'];
+        $this->dsn = $config['dsn'];
+        $this->dbuser = $config['username'];
+        $this->dbpass = $config['password'];
         $this->connect();
+        $this->dbh->query('SET NAMES ' . DB_CHARSET);
     }
 
     public static function getInstance() {
-        if ($this->instance == null) {
-            $this->instance = new Database();
+        if (self::$instance === null) {
+            self::$instance = new include_database();
         }
-        return $this->instance;
+        return self::$instance;
     }
 
     private function connect() {
-        $this->DB = new PDO($this->connectionString, $this->username, $this->password);
-        if ($this->DB) {
-            $this->version = $this->DB->getAttribute(PDO::ATTR_SERVER_VERSION);
-            if ($this->version > '4.1') {
-                $this->DB->exec("SET NAMES 'utf8'");
-            }
-            if ($this->version > '5.0.1') {
-                $this->DB->exec("SET sql_mode=''");
-            }
-        } else {
-            self::halt('Can not connect MySQL Server or DataBase.');
+        try {
+            $this->dbh = new PDO($this->dsn, $this->dbuser, $this->dbpass);
+        } catch (PDOException $e) {
+            exit('连接失败:' . $e->getMessage());
         }
     }
-
-    private function getErrInfo() {
-        if (self::getErrNo() != '00000') {
-            $info = (self::$stmt) ? self::$stmt->errorInfo() : self::$DB->errorInfo();
-            self::halt($info[2]);
-        }
-    }
-
-    function getErrNo() {
-        if (self::$stmt) {
-            return self::$stmt->errorCode();
-        } else {
-            return self::$DB->errorCode();
-        }
-    }
-
-    /*     * *
-     * 输出数据库出错信息
-     * * */
-
-    private function halt($msg = '') {
-        $message = "<html>\n<head>\n";
-        $message .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">\n";
-        $message .= "<style type=\"text/css\">\n";
-        $message .= "* {font:12px Verdana;}\n";
-        $message .= "</style>\n";
-        $message .= "</head>\n";
-        $message .= "<body bgcolor=\"#FFFFFF\" text=\"#000000\" link=\"#006699\" vlink=\"#5493B4\">\n";
-        $message .= "<p>Mysql error:</p><pre><b>" . htmlspecialchars($msg) . "</b></pre>\n";
-        $message .= "<b>Mysql error description</b>: " . htmlspecialchars(self::getErrInfo()) . "\n<br />";
-        $message .= "<b>Date</b>: " . date("Y-m-d @ H:i") . "\n<br />";
-        $message .= "<b>Script</b>: http.//" . $_SERVER['HTTP_HOST'] . getenv("REQUEST_URI") . "\n<br />";
-        $message .= "</body>\n</html>";
-        echo $message;
-        exit;
-    }
-
-    /*     * *
-     * 作用:获取当前库的所有表名
-     * 返回:当前库的所有表名
-     * 类型:数组
-     * * */
-
-    public function getTablesName() {
-        self::$stmt = self::$DB->query('SHOW TABLES FROM ' . self::$dbname);
-        self::getErrInfo();
-        $result = self::$stmt->fetchAll(PDO::FETCH_NUM);
-        self::$stmt = null;
-        return $result;
-    }
-
-    /*     * *
-     * 作用:获取数据表里的字段
-     * 返回:表字段结构
-     * 类型:数组
-     * * */
 
     public function getFields($table) {
-        self::$stmt = self::$DB->query("DESCRIBE $table");
-        self::getErrInfo();
-        $result = self::$stmt->fetchAll(PDO::FETCH_ASSOC);
-        self::$stmt = null;
+        $this->sth = $this->dbh->query("DESCRIBE $table");
+        $this->getPDOError();
+        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->sth->fetchAll();
+        $this->sth = null;
         return $result;
     }
 
-    /*     * *
-     * 作用:获取所有数据
-     * 返回:表内记录
-     * 类型:数组
-     * 参数:select * from table
-     * * */
-
-    public function getAll($sql, $type = PDO::FETCH_ASSOC) {
-        if (self::$debug) {
-            echo $sql . '<br />';
+    //获取要操作的数据
+    private function getCode($table, $args) {
+        $allTables = require_once(DOCUMENT_ROOT . '/cache/tables.php');
+        if (!is_array($allTables[$table])) {
+            exit('表名错误或未更新缓存!');
         }
-        $result = array();
-        self::$stmt = self::$DB->query($sql);
-        self::getErrInfo();
-        self::$querycount++;
-        $result = self::$stmt->fetchAll($type);
-        self::$stmt = null;
-        return $result;
-    }
-
-    /*     * *
-     * 作用:获取单行数据
-     * 返回:表内记录
-     * 类型:数组
-     * 参数:select * from table where id='1'
-     * * */
-
-    public function getOne($sql, $type = PDO::FETCH_ASSOC) {
-        if (self::$debug) {
-            echo $sql . '<br />';
-        }
-        $result = array();
-        self::$stmt = self::$DB->query($sql);
-        self::getErrInfo();
-        self::$querycount++;
-        $result = self::$stmt->fetch($type);
-        self::$stmt = null;
-        return $result;
-    }
-
-    /*     * *
-     * 获取记录总数
-     * 返回:记录数
-     * 类型:数字
-     * 参数:select count(*) from table
-     * * */
-
-    public function getRows($sql = '') {
-        if ($sql) {
-            if (self::$debug) {
-                echo $sql . '<br />';
+        $tables = array_flip($allTables[$table]);
+        $unarr = array_diff_key($args, $tables);
+        if (is_array($unarr)) {
+            foreach ($unarr as $k => $v) {
+                unset($args[$k]);
             }
-            self::$stmt = self::$DB->query($sql);
-            self::getErrInfo();
-            self::$querycount++;
-            $result = self::$stmt->fetchColumn();
-            self::$stmt = null;
-        } elseif (self::$stmt) {
-            $result = self::$stmt->rowCount();
-        } else {
-            $result = 0;
         }
+        $code = '';
+        if (is_array($args)) {
+            foreach ($args as $k => $v) {
+                if ($v == '') {
+                    continue;
+                }
+                $code .= "`$k`='$v',";
+            }
+        }
+        $code = substr($code, 0, -1);
+        return $code;
+    }
+
+    //插入数据
+    public function insert($table, $args, $debug = null) {
+        $sql = "INSERT INTO `$table` SET ";
+        $code = $this->getCode($table, $args);
+        $sql .= $code;
+        if ($debug)
+            echo $sql;
+        if ($this->dbh->exec($sql)) {
+            $this->getPDOError();
+            return $this->dbh->lastInsertId();
+        }
+        return false;
+    }
+
+    //查询数据
+    public function fetch($table, $condition = '', $sort = '', $limit = '', $field = '*', $debug = false) {
+        $sql = "SELECT {$field} FROM `{$table}`";
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        }
+        if ($sort != '') {
+            $sql .= " ORDER BY $sort";
+        }
+        if ($limit != '') {
+            $sql .= " LIMIT $limit";
+        }
+        if ($debug)
+            echo $sql;
+        $this->sth = $this->dbh->query($sql);
+        $this->getPDOError();
+        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->sth->fetchAll();
+        $this->sth = null;
         return $result;
     }
 
-// 获得最后INSERT的主键ID
-    public function getLastId() {
-        return self::$DB->lastInsertId();
+    //查询数据
+    public function fetchOne($table, $condition = null, $field = '*', $debug = false) {
+        $sql = "SELECT {$field} FROM `{$table}`";
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        }
+        if ($debug)
+            echo $sql;
+        $this->sth = $this->dbh->query($sql);
+        $this->getPDOError();
+        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->sth->fetch();
+        $this->sth = null;
+        return $result;
     }
 
-// 执行INSERT\UPDATE\DELETE,返回执行语句影响行数,数字类型
-    public function Execute($sql) {
-        $return = self::$DB->exec($sql);
-        self::getErrInfo();
-        self::$querycount++;
-        return $return;
+    //获取查询条件
+    public function getCondition($condition = '') {
+        if ($condition != '') {
+            $con = ' WHERE';
+            if (is_array($condition)) {
+                $i = 0;
+                foreach ($condition as $k => $v) {
+                    if ($i != 0) {
+                        $con .= " AND $k = '$v'";
+                    } else {
+                        $con .= " $k = '$v'";
+                    }
+                    $i++;
+                }
+            } elseif (is_string($condition)) {
+                $con .= " $condition";
+            } else {
+                return false;
+            }
+            return $con;
+        }
+        return false;
     }
 
-// 关闭数据连接
-    public function CloseDB() {
-        self::$DB = null;
+    //获取记录总数
+    public function counts($table, $condition = '', $debug = false) {
+        $sql = "SELECT COUNT(*) AS num FROM `$table`";
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        }
+        if ($debug)
+            echo $sql;
+        $count = $this->dbh->query($sql);
+        $this->getPDOError();
+        return $count->fetchColumn();
+    }
+
+    //按SQL语句查询
+    public function doSql($sql, $model = 'many', $debug = false) {
+        if ($debug)
+            echo $sql;
+        $this->sth = $this->dbh->query($sql);
+        $this->getPDOError();
+        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
+        if ($model == 'many') {
+            $result = $this->sth->fetchAll();
+        } else {
+            $result = $this->sth->fetch();
+        }
+        $this->sth = null;
+        return $result;
+    }
+
+    //修改数据
+    public function update($table, $args, $condition, $debug = null) {
+        $code = $this->getCode($table, $args);
+        $sql = "UPDATE `$table` SET ";
+        $sql .= $code;
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        }
+        if ($debug)
+            echo $sql;
+        if (($rows = $this->dbh->exec($sql)) > 0) {
+            $this->getPDOError();
+            return $rows;
+        }
+        return false;
+    }
+
+    //字段递增
+    public function increase($table, $condition, $field, $debug = false) {
+        $sql = "UPDATE `$table` SET $field = $field + 1";
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        }
+        if ($debug)
+            echo $sql;
+        if (($rows = $this->dbh->exec($sql)) > 0) {
+            $this->getPDOError();
+            return $rows;
+        }
+        return false;
+    }
+
+    //删除记录
+    public function del($table, $condition, $debug = false) {
+        $sql = "DELETE FROM `$table`";
+        if (false !== ($con = $this->getCondition($condition))) {
+            $sql .= $con;
+        } else {
+            exit('条件错误!');
+        }
+        if ($debug)
+            echo $sql;
+        if (($rows = $this->dbh->exec($sql)) > 0) {
+            $this->getPDOError();
+            return $rows;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 执行无返回值的SQL查询
+     *
+     */
+    public function execute($sql) {
+        $this->dbh->exec($sql);
+        $this->getPDOError();
+    }
+
+    /**
+     * 捕获PDO错误信息
+     */
+    private function getPDOError() {
+        if ($this->dbh->errorCode() != '00000') {
+            $error = $this->dbh->errorInfo();
+            exit($error[2]);
+        }
+    }
+
+    //关闭数据连接
+    public function __destruct() {
+        $this->dbh = null;
     }
 
 }
