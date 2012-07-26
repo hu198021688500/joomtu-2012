@@ -18,46 +18,37 @@
  */
 class Mysql {
 
-    private static $instance;
-    public $dsn;
-    public $dbuser;
-    public $dbpass;
-    public $sth;
-    public $dbh;
+    private $__pdo;
+    private $__pdoStatement;
+    private $__tablePrefix;
+    private static $__instance;
 
-    private function __construct($config) {
-        $this->dsn = $config['dsn'];
-        $this->dbuser = $config['username'];
-        $this->dbpass = $config['password'];
-        $this->connect();
-        $this->dbh->query('SET NAMES ' . DB_CHARSET);
+    public function __construct($config) {
+        try {
+            $this->__pdo = new PDO($config['dsn'], $config['username'], $config['password']);
+        } catch (PDOException $e) {
+            exit('connect faild:' . $e->getMessage());
+        }
+        $this->__pdo->query('SET NAMES UTF8');
     }
 
     public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new include_database();
+        if (self::$__instance === null) {
+            self::$__instance = new include_database();
         }
-        return self::$instance;
-    }
-
-    private function connect() {
-        try {
-            $this->dbh = new PDO($this->dsn, $this->dbuser, $this->dbpass);
-        } catch (PDOException $e) {
-            exit('连接失败:' . $e->getMessage());
-        }
+        return self::$__instance;
     }
 
     public function getFields($table) {
-        $this->sth = $this->dbh->query("DESCRIBE $table");
+        $table = empty($this->__tablePrefix) ? $table : $this->__tablePrefix . $table;
+        $this->__pdoStatement = $this->__pdo->query("DESCRIBE $table");
         $this->getPDOError();
-        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
-        $result = $this->sth->fetchAll();
-        $this->sth = null;
+        $this->__pdoStatement->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->__pdoStatement->fetchAll();
+        $this->__pdoStatement = null;
         return $result;
     }
 
-    //获取要操作的数据
     private function getCode($table, $args) {
         $allTables = require_once(DOCUMENT_ROOT . '/cache/tables.php');
         if (!is_array($allTables[$table])) {
@@ -90,9 +81,9 @@ class Mysql {
         $sql .= $code;
         if ($debug)
             echo $sql;
-        if ($this->dbh->exec($sql)) {
+        if ($this->__pdo->exec($sql)) {
             $this->getPDOError();
-            return $this->dbh->lastInsertId();
+            return $this->__pdo->lastInsertId();
         }
         return false;
     }
@@ -111,11 +102,11 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        $this->sth = $this->dbh->query($sql);
+        $this->__pdoStatement = $this->__pdo->query($sql);
         $this->getPDOError();
-        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
-        $result = $this->sth->fetchAll();
-        $this->sth = null;
+        $this->__pdoStatement->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->__pdoStatement->fetchAll();
+        $this->__pdoStatement = null;
         return $result;
     }
 
@@ -127,11 +118,11 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        $this->sth = $this->dbh->query($sql);
+        $this->__pdoStatement = $this->__pdo->query($sql);
         $this->getPDOError();
-        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
-        $result = $this->sth->fetch();
-        $this->sth = null;
+        $this->__pdoStatement->setFetchMode(PDO::FETCH_ASSOC);
+        $result = $this->__pdoStatement->fetch();
+        $this->__pdoStatement = null;
         return $result;
     }
 
@@ -167,7 +158,7 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        $count = $this->dbh->query($sql);
+        $count = $this->__pdo->query($sql);
         $this->getPDOError();
         return $count->fetchColumn();
     }
@@ -176,15 +167,15 @@ class Mysql {
     public function doSql($sql, $model = 'many', $debug = false) {
         if ($debug)
             echo $sql;
-        $this->sth = $this->dbh->query($sql);
+        $this->__pdoStatement = $this->__pdo->query($sql);
         $this->getPDOError();
-        $this->sth->setFetchMode(PDO::FETCH_ASSOC);
+        $this->__pdoStatement->setFetchMode(PDO::FETCH_ASSOC);
         if ($model == 'many') {
-            $result = $this->sth->fetchAll();
+            $result = $this->__pdoStatement->fetchAll();
         } else {
-            $result = $this->sth->fetch();
+            $result = $this->__pdoStatement->fetch();
         }
-        $this->sth = null;
+        $this->__pdoStatement = null;
         return $result;
     }
 
@@ -198,7 +189,7 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        if (($rows = $this->dbh->exec($sql)) > 0) {
+        if (($rows = $this->__pdo->exec($sql)) > 0) {
             $this->getPDOError();
             return $rows;
         }
@@ -213,7 +204,7 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        if (($rows = $this->dbh->exec($sql)) > 0) {
+        if (($rows = $this->__pdo->exec($sql)) > 0) {
             $this->getPDOError();
             return $rows;
         }
@@ -230,7 +221,7 @@ class Mysql {
         }
         if ($debug)
             echo $sql;
-        if (($rows = $this->dbh->exec($sql)) > 0) {
+        if (($rows = $this->__pdo->exec($sql)) > 0) {
             $this->getPDOError();
             return $rows;
         } else {
@@ -238,28 +229,20 @@ class Mysql {
         }
     }
 
-    /**
-     * 执行无返回值的SQL查询
-     *
-     */
     public function execute($sql) {
-        $this->dbh->exec($sql);
+        $this->__pdo->exec($sql);
         $this->getPDOError();
     }
 
-    /**
-     * 捕获PDO错误信息
-     */
-    private function getPDOError() {
-        if ($this->dbh->errorCode() != '00000') {
-            $error = $this->dbh->errorInfo();
+    private function getError() {
+        if ($this->__pdo->errorCode() != '00000') {
+            $error = $this->__pdo->errorInfo();
             exit($error[2]);
         }
     }
 
-    //关闭数据连接
     public function __destruct() {
-        $this->dbh = null;
+        $this->__pdo = null;
     }
 
 }

@@ -4,7 +4,7 @@
 		<?php if (!empty($users)){foreach ($users as $user) {?>
 		<?php if ($user->uid != Yii::app()->user->id){?>
 		<tr>
-			<td><?php echo $user->name;?>(<a href="/user/index/id/<?php echo $user->uid;?>"><?php echo $user->email;?></a>)</td>
+			<td><?php echo $user->nickname;?>(<a href="/user/index/id/<?php echo $user->uid;?>"><?php echo $user->email;?></a>)</td>
 			<td><?php echo RelComponent::getRelStr($user->uid);?></td>
 			<td>
 				<select class="relTypes" name="relTypes">

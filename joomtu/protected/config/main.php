@@ -242,8 +242,8 @@ return array(
     'params' => array(
         // this is used in contact page
         'adminEmail' => 'webmaster@example.com',
-        'siteUrl' => 'http://www.joomtu.dev/',
-        'neo4jRestUrl' => 'http://host135.freebsd.hu:7474/db/data/',
+        'siteUrl' => 'http://dev.joomtu.com/',
+        'neo4jRestUrl' => 'http://host185.freebsd.hu:7474/db/data/',
         'registerCaptcha' => false,
         'loginCaptcha' => false
     ),
