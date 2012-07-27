@@ -1,80 +1,65 @@
 <?php
 
-// uncomment the following to define a path alias
-// Yii::setPathOfAlias('local','path/to/local-folder');
-// This is the main Web application configuration. Any writable
-// CWebApplication properties can be configured here.
+Yii::setPathOfAlias('local', '/var/www/joomtu-2012/joomtu');
 return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'name' => 'Joomtu 2012',
-    //网站语言 多语言设置，对应 protected/messages/zh_cn
     //'language' => 'zh_cn',
-    //时区设置
     'timeZone' => 'Asia/Shanghai',
-    //默认访问 即访问index.php时会自动跳转到某个controller
     'defaultController' => 'site',
-    // preloading 'log' component
     'preload' => array('log'),
-    // autoloading model and component classes
     'import' => array(
         'application.forms.*',
         'application.models.*',
         'application.behaviors.*',
         'application.components.*',
         'application.modules.srbac.controllers.SBaseController',
-        // debug扩展
-        'ext.debugtb.*',
+        'ext.debugtb.*'
     ),
-    //模块设置 设置后，同名module优先级高于contoller
     'modules' => array(
-        // the following to enable the Gii tool 代码生成工具
-        // 开启GII模块，不使用必须注释掉。
         'gii' => array(
             'class' => 'system.gii.GiiModule',
             'password' => 'hugb',
-            // If removed, Gii defaults to localhost only. Edit carefully to taste.
             'ipFilters' => array('127.0.0.1', '::1'),
             'newFileMode' => 0666,
             'newDirMode' => 0777
         ),
         'admin' => array(),
         'srbac' => array(
-            'userclass' => 'User', //default: User
-            'userid' => 'uid', //default: userid
-            'username' => 'email', //default:username
-            'delimeter' => '@', //default:-
-            'debug' => true, //default :false
-            'pageSize' => 10, // default : 15
-            'superUser' => 'Authority', //default: Authorizer
-            'css' => 'srbac.css', //default: srbac.css
-            'layout' => 'application.views.layouts.main', //default: application.views.layouts.main,must be an existing alias
-            'notAuthorizedView' => 'srbac.views.authitem.unauthorized', // default:srbac.views.authitem.unauthorized,must be an existing alias
-            'alwaysAllowed' => array(//default: array()
+            'userclass' => 'User',
+            'userid' => 'uid',
+            'username' => 'email',
+            'delimeter' => '@',
+            'debug' => true,
+            'pageSize' => 10,
+            'superUser' => 'Authority',
+            'css' => 'srbac.css',
+            'layout' => 'application.views.layouts.main',
+            'notAuthorizedView' => 'srbac.views.authitem.unauthorized',
+            'alwaysAllowed' => array(
                 'SiteLogin', 'SiteLogout', 'SiteIndex', 'SiteAdmin',
                 'SiteError', 'SiteContact'
             ),
-            'userActions' => array('Show', 'View', 'List'), //default: array()
-            'listBoxNumberOfLines' => 15, //default : 10
-            'imagesPath' => 'srbac.images', // default: srbac.images
-            'imagesPack' => 'noia', //default: noia
-            'iconText' => true, // default : false
-            'header' => 'srbac.views.authitem.header', //default : srbac.views.authitem.header,must be an existing alias
-            'footer' => 'srbac.views.authitem.footer', //default: srbac.views.authitem.footer,must be an existing alias
-            'showHeader' => true, // default: false
-            'showFooter' => true, // default: false
-            'alwaysAllowedPath' => 'srbac.components', // default: srbac.components must be an existing alias
+            'userActions' => array('Show', 'View', 'List'),
+            'listBoxNumberOfLines' => 15,
+            'imagesPath' => 'srbac.images',
+            'imagesPack' => 'noia',
+            'iconText' => true,
+            'header' => 'srbac.views.authitem.header',
+            'footer' => 'srbac.views.authitem.footer',
+            'showHeader' => true,
+            'showFooter' => true,
+            'alwaysAllowedPath' => 'srbac.components'
         )
     ),
-    // application components
     'components' => array(
         'SAEOAuth' => array(
             'WB_AKEY' => '1500340182',
             'WB_SKEY' => 'c09b0ad5183707679d79e8bc24259c8c',
             'callback' => '/site/callback',
-            'class' => 'SAEOAuth',
+            'class' => 'SAEOAuth'
         ),
         'user' => array(
-            // 允许cookie自动登录 并保存到runtime/state.bin
             'allowAutoLogin' => true,
         // session 前缀,单点登录与区分前后台登录时可以用到
         #'stateKeyPrefix'=> 'f_site',
@@ -235,12 +220,10 @@ return array(
           'class'=>'CFileCache',
           ),
          */
-        ),
+        )
     ),
-    // application-level parameters that can be accessed
     // using Yii::app()->params['paramName']
     'params' => array(
-        // this is used in contact page
         'adminEmail' => 'webmaster@example.com',
         'siteUrl' => 'http://dev.joomtu.com/',
         'neo4jRestUrl' => 'http://host185.freebsd.hu:7474/db/data/',
@@ -248,37 +231,3 @@ return array(
         'loginCaptcha' => false
     ),
 );
-
-/*
-//如果定义了常量，则默认为在SAE环境中
-if(defined('SAE_TMP_PATH'))
-{
-    //SAE 不支持I/O
-    $config['runtimePath'] = SAE_TMP_PATH;
-    //配置为 SAEDbConnection 则不必考虑用户名密码 并自动读写分离
-    $config['components']['db'] = array(
-            'class'=>'SAEDbConnection',
-            'charset' => 'utf8',
-        'tablePrefix'=>'tbl_',
-            'emulatePrepare' => true,
-            //开启sql 记录
-            'enableProfiling'=>true,
-            'enableParamLogging'=>true,
-            //cache
-            'schemaCachingDuration'=>3600,
-    );
-    //SAE不支持I/O 使用storage 存储 assets。 如果在正式环境，请将发布到assets的css/js做合并，直接放到app目录下，storage的分钟限额为5000，app为200000
-    //最新的SAE 不使用storage 而是在siteController中，导入了一个SAEAssetsAction，通过 site/assets?path=aaa.txt ，将文件内容输出到web端，来访问实际的 aaa.txt 文件，
-    $config['components']['assetManager'] = array('class' => 'SAEAssetManager','domain'=> 'assets');
-    //如果没有必要，不用修改缓存配置。 SAE不支持本地文件的IO处理 已经提供了memcache
-    $config['components']['cache'] = array(
-            'class'=> 'SAEMemCache',
-            'servers'=>array(
-                array('host'=>'localhost', 'port'=>11211, 'weight'=>100),
-            ),
-        );
-
-}
-return $config;
- *
- */
