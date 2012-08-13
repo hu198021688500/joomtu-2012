@@ -64,7 +64,7 @@ return array(
         // session 前缀,单点登录与区分前后台登录时可以用到
         #'stateKeyPrefix'=> 'f_site',
         // 登录链接 Yii::app()->user->loginUrl
-        #'loginUrl'=> array('/site/login'),
+        'loginUrl'=> array('/user/login'),
         //cookie 验证
         #'identityCookie'=>array('domain'=>'.'.ALL_DOMAIN,),
         //自动刷新 cookie
