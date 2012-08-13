@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主机: localhost
--- 生成日期: 2012 年 07 月 26 日 18:06
+-- 生成日期: 2012 年 07 月 31 日 15:35
 -- 服务器版本: 5.5.24
 -- PHP 版本: 5.3.10-1ubuntu3.2
 
@@ -3521,20 +3521,6 @@ INSERT INTO `jt_area` (`aid`, `pid`, `order`, `lid`, `rid`, `depth`, `name`) VAL
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_assignments`
---
-
-CREATE TABLE IF NOT EXISTS `jt_assignments` (
-  `itemname` varchar(64) NOT NULL,
-  `userid` varchar(64) NOT NULL,
-  `bizrule` text,
-  `data` text,
-  PRIMARY KEY (`itemname`,`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- 表的结构 `jt_friend_group`
 --
 
@@ -3570,53 +3556,6 @@ CREATE TABLE IF NOT EXISTS `jt_friend_group_rel` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_itemchildren`
---
-
-CREATE TABLE IF NOT EXISTS `jt_itemchildren` (
-  `parent` varchar(64) NOT NULL,
-  `child` varchar(64) NOT NULL,
-  PRIMARY KEY (`parent`,`child`),
-  KEY `child` (`child`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- 表的结构 `jt_items`
---
-
-CREATE TABLE IF NOT EXISTS `jt_items` (
-  `name` varchar(64) NOT NULL,
-  `type` int(11) NOT NULL,
-  `description` text,
-  `bizrule` text,
-  `data` text,
-  PRIMARY KEY (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- 转存表中的数据 `jt_items`
---
-
-INSERT INTO `jt_items` (`name`, `type`, `description`, `bizrule`, `data`) VALUES
-('Authority', 2, NULL, NULL, NULL),
-('Administrator', 2, NULL, NULL, NULL),
-('User', 2, NULL, NULL, NULL),
-('Post Manager', 1, NULL, NULL, NULL),
-('User Manager', 1, NULL, NULL, NULL),
-('Delete Post', 0, NULL, NULL, NULL),
-('Create Post', 0, NULL, NULL, NULL),
-('Edit Post', 0, NULL, NULL, NULL),
-('View Post', 0, NULL, NULL, NULL),
-('Delete User', 0, NULL, NULL, NULL),
-('Create User', 0, NULL, NULL, NULL),
-('Edit User', 0, NULL, NULL, NULL),
-('View User', 0, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
 -- 表的结构 `jt_key_value`
 --
 
@@ -3624,7 +3563,8 @@ CREATE TABLE IF NOT EXISTS `jt_key_value` (
   `id` int(10) unsigned NOT NULL,
   `key` varchar(15) DEFAULT NULL,
   `value` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `key` (`key`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='字典表';
 
 -- --------------------------------------------------------
@@ -3855,23 +3795,6 @@ CREATE TABLE IF NOT EXISTS `jt_user_photo_pic` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jt_user_rel`
---
-
-CREATE TABLE IF NOT EXISTS `jt_user_rel` (
-  `rid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '关系ID',
-  `from_uid` int(10) unsigned NOT NULL,
-  `to_uid` int(10) unsigned NOT NULL,
-  `name` varchar(10) NOT NULL,
-  `create_time` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`rid`),
-  KEY `FK_jt_user_rel_from_uid` (`from_uid`),
-  KEY `FK_jt_user_rel_to_uid` (`to_uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户关系表' AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- 表的结构 `jt_user_role`
 --
 
@@ -3896,6 +3819,33 @@ INSERT INTO `jt_user_role` (`rid`, `prid`, `name`, `show_name`, `description`, `
 (3, NULL, '编辑人员', '编辑人员', '编辑人员', 0, 0),
 (4, NULL, '普通会员', '普通会员', '普通会员', 0, 0),
 (5, NULL, '游客', '游客', '游客', 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_role_access`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_role_access` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `role_id` int(10) unsigned NOT NULL COMMENT '用户角色ID',
+  `res_id` int(10) unsigned NOT NULL COMMENT '资源ID',
+  `is_allow` int(1) unsigned DEFAULT '0' COMMENT '是否允许访问',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `jt_user_role_res`
+--
+
+CREATE TABLE IF NOT EXISTS `jt_user_role_res` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '资源ID',
+  `path` varchar(50) NOT NULL COMMENT '资源路径',
+  `description` varchar(100) NOT NULL COMMENT '资源描述',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='用户访问资源表' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -3928,7 +3878,8 @@ CREATE TABLE IF NOT EXISTS `YiiSession` (
 --
 
 INSERT INTO `YiiSession` (`id`, `expire`, `data`) VALUES
-('mosft299834ctebge71pl8f1t6', 1343298463, '');
+('fnc169s1pv1fgjm6p1i0qo5e21', 1343383247, 'gii__returnUrl|s:4:"/gii";'),
+('e5t0g0t1m6j35t1ekqimddkj36', 1343384633, 'gii__returnUrl|s:4:"/gii";50fb2a7c96414c30a1334078ca13d1fd__id|s:1:"1";50fb2a7c96414c30a1334078ca13d1fd__name|s:0:"";50fb2a7c96414c30a1334078ca13d1fdnickname|s:4:"胡1";50fb2a7c96414c30a1334078ca13d1fdrole|s:1:"1";50fb2a7c96414c30a1334078ca13d1fd__states|a:2:{s:8:"nickname";b:1;s:4:"role";b:1;}');
 
 --
 -- 限制导出的表
@@ -3985,13 +3936,6 @@ ALTER TABLE `jt_user_photo`
 --
 ALTER TABLE `jt_user_photo_pic`
   ADD CONSTRAINT `FK_jt_user_photo_pic_uid` FOREIGN KEY (`uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
-
---
--- 限制表 `jt_user_rel`
---
-ALTER TABLE `jt_user_rel`
-  ADD CONSTRAINT `FK_jt_user_rel_from_uid` FOREIGN KEY (`from_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `FK_jt_user_rel_to_uid` FOREIGN KEY (`to_uid`) REFERENCES `jt_user` (`uid`) ON DELETE CASCADE;
 
 --
 -- 限制表 `jt_user_stores_ext`
