@@ -25,6 +25,10 @@ class SiteController extends Controller {
      * when an action is not explicitly requested by users.
      */
     public function actionIndex() {
+        //echo 'fastdfs_tracker_make_all_connections result: ' . fastdfs_tracker_make_all_connections() . "\n";
+        var_dump(fastdfs_tracker_list_groups());
+
+        //var_dump(fastdfs_tracker_get_connection());
         //echo Yii::app()->user->name;
         // renders the view file 'protected/views/site/index.php'
         // using the default layout 'protected/views/layouts/main.php'

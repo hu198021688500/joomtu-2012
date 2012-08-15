@@ -143,4 +143,8 @@ class UserController extends Controller {
         $this->render('licence');
     }
 
+    public function actionAvatar() {
+
+    }
+
 }
