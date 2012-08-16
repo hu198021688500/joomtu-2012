@@ -26,7 +26,8 @@ class SiteController extends Controller {
      */
     public function actionIndex() {
         //echo 'fastdfs_tracker_make_all_connections result: ' . fastdfs_tracker_make_all_connections() . "\n";
-        var_dump(fastdfs_tracker_list_groups());
+        $xx = new UploadBehavior();
+        var_dump($xx->test());
 
         //var_dump(fastdfs_tracker_get_connection());
         //echo Yii::app()->user->name;
