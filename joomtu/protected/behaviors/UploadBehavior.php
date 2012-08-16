@@ -37,45 +37,6 @@ class UploadBehavior {
     }
 
     public function test() {
-
-        function my_download_file_callback($args, $file_size, $data) {
-            var_dump($args);
-
-            if ($args['fhandle'] == NULL) {
-                $args['fhandle'] = fopen($args['filename'], 'w');
-                if (!$args['fhandle']) {
-                    echo 'open file: ' . $args['filename'] . " fail!\n";
-                    return false;
-                }
-            }
-
-            $len = strlen($data);
-            if (fwrite($args['fhandle'], $data, $len) === false) {
-                echo 'write to file: ' . $args['filename'] . " fail!\n";
-                $result = false;
-            } else {
-                $args['write_bytes'] += $len;
-                $result = true;
-            }
-
-            if ((!$result) || $args['write_bytes'] >= $file_size) {
-                fclose($args['fhandle']);
-                $args['fhandle'] = NULL;
-                $args['write_bytes'] = 0;
-            }
-
-            return $result;
-        }
-
-        $download_callback_arg = array(
-            'filename' => '/tmp/out.txt',
-            'write_bytes' => 0,
-            'fhandle' => NULL
-        );
-        $download_callback_array = array(
-            'callback' => 'my_download_file_callback',
-            'args' => &$download_callback_arg);
-
         //var_dump(fastdfs_client_version());
         //var_dump(fastdfs_gen_slave_filename('M01/02/76/wKgUy0-grau35AoQAADAuWPGnjc502', '_main'));
         //var_dump(fastdfs_gen_slave_filename('M01/02/76/wKgUy0-grau35AoQAADAuWPGnjc502.png', '_main', 'jpg'));
