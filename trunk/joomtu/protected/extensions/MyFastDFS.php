@@ -20,18 +20,6 @@ class MyFastDFS {
 
     private $__error;
 
-    public function __construct() {
-        //fastdfs_tracker_make_all_connections();
-    }
-
-    public function __destruct() {
-        //fastdfs_tracker_close_all_connections();
-    }
-
-    public function test() {
-
-    }
-
     public function uploadSlave($local_filename, $master_filename, $prefix_name, $file_ext_name = null, $meta_list = array()) {
         $tracker = $this->_getTrackerCon();
         $storage = $this->_getStorageCon();
