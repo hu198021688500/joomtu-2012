@@ -888,7 +888,7 @@ class Neo4j {
      * 	The response is an ordered list of node or relationship representations, with one new property added: indexed. This property can be used to remove the indexed entity at a later point.
      * @return mix
      */
-    public function indexSearch($query, $isKey) {
+    public function indexSearch($query, $isKey, $type) {
         $myWhat = '';
         $tempStr = $isKey ? 'the_key/' : '';
         switch ($type) {
