@@ -14,6 +14,11 @@
  */
 class UserController extends Controller {
 
+    public function init() {
+        parent :: init();
+        //Yii::app()->clientScript->registerCssFile(Yii::app()->request->baseUrl . '/styles/user.css');
+    }
+
     public function actions() {
         return array(
             'captcha' => array(
@@ -24,7 +29,7 @@ class UserController extends Controller {
     }
 
     public function actionIndex() {
-        $uid = Yii::app()->getRequest()->getParam('id');
+        $uid = Yii :: app()->getRequest()->getParam('id');
         if (empty($uid)) {
             $this->redirect('/user/home');
         } else {
@@ -34,22 +39,22 @@ class UserController extends Controller {
             if (empty($viewData['user'])) {
                 $this->redirect('/site/index');
             }
-            if (!Yii::app()->user->isGuest) {
+            if (!Yii :: app()->user->isGuest) {
                 $rel = new UserRel();
-                $viewData['toMeRels'] = $rel->getUserRelsNames($uid, Yii::app()->user->id);
+                $viewData['toMeRels'] = $rel->getUserRelsNames($uid, Yii :: app()->user->id);
             }
             $this->render('index', $viewData);
         }
     }
 
     public function actionHome() {
-        if (Yii::app()->user->isGuest) {
+        if (Yii :: app()->user->isGuest) {
             $this->redirect('/site/index');
         }
     }
 
     public function actionProfile() {
-        if (Yii::app()->user->isGuest) {
+        if (Yii :: app()->user->isGuest) {
             $this->redirect('/site/index');
         }
         $this->refresh();
@@ -59,18 +64,20 @@ class UserController extends Controller {
         $model = new UserRegisterForm();
 
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-register-form') {
-            echo CActiveForm::validate($model);
-            Yii::app()->end();
+            echo CActiveForm :: validate($model);
+            Yii :: app()->end();
         }
 
         if (isset($_POST['UserRegisterForm'])) {
             $model->attributes = $_POST['UserRegisterForm'];
             if ($model->validate() && $model->saveUser()) {
-                $this->redirect(Yii::app()->homeUrl);
+                $this->redirect(Yii :: app()->homeUrl);
             }
         }
 
-        $this->render('register', array('model' => $model));
+        $this->render('register', array(
+            'model' => $model
+        ));
     }
 
     /**
@@ -80,21 +87,23 @@ class UserController extends Controller {
         $model = new UserLoginForm;
 
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-login-form') {
-            echo CActiveForm::validate($model);
-            Yii::app()->end();
+            echo CActiveForm :: validate($model);
+            Yii :: app()->end();
         }
 
         if (isset($_POST['UserLoginForm'])) {
             $model->attributes = $_POST['UserLoginForm'];
             if ($model->validate() && $model->login()) {
-                Yii::log("Successful login of user: " . Yii::app()->user->id, "info", "application.controllers.SiteController");
-                $this->redirect(Yii::app()->user->returnUrl);
+                Yii :: log("Successful login of user: " . Yii :: app()->user->id, "info", "application.controllers.SiteController");
+                $this->redirect(Yii :: app()->user->returnUrl);
             } else {
-                Yii::log("Failed login attempt", "warning", "application.controllers.SiteController");
+                Yii :: log("Failed login attempt", "warning", "application.controllers.SiteController");
             }
         }
 
-        $this->render('login', array('model' => $model));
+        $this->render('login', array(
+            'model' => $model
+        ));
     }
 
     /**
@@ -104,24 +113,26 @@ class UserController extends Controller {
         $model = new UserFindPassForm();
 
         if (isset($_POST['ajax']) && $_POST['ajax'] === 'user-find-pass-form') {
-            echo CActiveForm::validate($model);
-            Yii::app()->end();
+            echo CActiveForm :: validate($model);
+            Yii :: app()->end();
         }
 
         if (isset($_POST['UserFindPassForm'])) {
             $model->attributes = $_POST['UserFindPassForm'];
             if ($model->validate()) {
                 if ($model->sendMailUse163()) {
-                    Yii::app()->user->setFlash('send_email_status', true);
+                    Yii :: app()->user->setFlash('send_email_status', true);
                 } else {
-                    Yii::app()->user->setFlash('send_email_status', false);
+                    Yii :: app()->user->setFlash('send_email_status', false);
                 }
-                Yii::app()->user->setFlash('send_email_address', $model->email);
+                Yii :: app()->user->setFlash('send_email_address', $model->email);
                 $this->refresh();
             }
         }
 
-        $this->render('findpass', array('model' => $model));
+        $this->render('findpass', array(
+            'model' => $model
+        ));
     }
 
     public function actionResetPwd() {
@@ -132,8 +143,8 @@ class UserController extends Controller {
      * user logout
      */
     public function actionLogout() {
-        Yii::app()->user->logout();
-        $this->redirect(Yii::app()->homeUrl);
+        Yii :: app()->user->logout();
+        $this->redirect(Yii :: app()->homeUrl);
     }
 
     /**
@@ -144,7 +155,12 @@ class UserController extends Controller {
     }
 
     public function actionAvatar() {
-
+        $this->layout = false;
+        var_dump(CJSON :: decode(file_get_contents('/var/www/111'), true));
+        die();
+        $js = Yii :: app()->request->baseUrl . '/scripts/ImageCropper.js';
+        Yii :: app()->clientScript->registerScriptFile($js);
+        $this->render('avatar');
     }
 
 }
