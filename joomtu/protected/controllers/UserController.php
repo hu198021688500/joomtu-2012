@@ -156,7 +156,13 @@ class UserController extends Controller {
 
     public function actionAvatar() {
         $this->layout = false;
-        //var_dump(CJSON::decode(file_get_contents('http://hi.baidu.com/home/data/usercard?qing_request_source=&ids=dfd06c65726573610f02,8100746f6f74776f5f322917,a0676f6e656d75d902,750f77616e6d616f373038df02,578a78696e67736865323030380804,22c2686f6e676465373135cc0c,a256636c696e67736d696c65eb01,f40e6e75616e6e75616e30363235d826,698b7169616f6b613532364c00,439b797961696d69636b79747678711728&b1345186283088=1'), true));die();
+        if (Yii::app()->getRequest()->isPostRequest) {
+            $file = CUploadedFile::getInstanceByName("file");
+            if ($file == false) {
+                return false;
+            }
+            $file->saveAs('/var/www/xx.jpg');
+        }
 
         $js = Yii::app()->request->baseUrl . '/scripts/ImageCropper.js';
         Yii::app()->clientScript->registerScriptFile($js);

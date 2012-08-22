@@ -143,23 +143,18 @@
                 }
             }
 
-            function saveImage()
-            {
+            function saveImage() {
                 var imgData = cropper.getCroppedImageData(180, 180);
-
                 var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function(e)
-                {
-                    if(xhr.readyState == 4)
-                    {
-                        if(xhr.status == 200)
-                        {
+                xhr.onreadystatechange = function(e) {
+                    if(xhr.readyState == 4) {
+                        if(xhr.status == 200) {
                             document.getElementById("status").innerHTML = "<font color='#f00'>上传成功！</font>";
                         }
                     }
                 };
 
-                xhr.open("post", "http://localhost:8080/uploader/action.do", true);
+                xhr.open("post", "http://dev.joomtu.com/user/avatar", true);
                 var data = new FormData();
                 data.append("username", "flashlizi");
                 data.append("size", 180);
