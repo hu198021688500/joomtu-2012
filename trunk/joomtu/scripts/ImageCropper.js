@@ -290,8 +290,7 @@
                 this.imageContext.drawImage(this.image, -this.image.width, 0);
                 break;
             case 180:
-                this.imageContext.drawImage(this.image, -this.image.width,
-                    -this.image.height);
+                this.imageContext.drawImage(this.image, -this.image.width, -this.image.height);
                 break;
             case 270:
                 this.imageContext.drawImage(this.image, 0, -this.image.height);
